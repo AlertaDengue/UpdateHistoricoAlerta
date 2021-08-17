@@ -13,6 +13,8 @@ make create_passwd
 *Add your variable keys:*
 > simple vault example
 ```
+cluster_node_hetzner: 127.0.0.1
+cluster_node_fgv: 127.0.0.2
 cluster_sudo_passwd: 123456
 cluster_user_name: userhost
 psql_user: psqluser
