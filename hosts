@@ -1,0 +1,10 @@
+[servers]
+HETZNER ansible_host='{{ node_hetzner }}'
+# FGV ansible_host='{{ node_fgv }}'
+
+[servers:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_user='{{ cluster_user_name }}'
+ansible_become=yes 
+ansible_become_method=sudo
+ansible_become_pass='{{ cluster_sudo_pass }}'
