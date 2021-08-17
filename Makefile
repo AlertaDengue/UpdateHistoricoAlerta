@@ -1,6 +1,6 @@
 # Makefile
 
-all: install run
+all: install create_passwd run
 
 install: venv
 	: # install virtualven
@@ -17,9 +17,17 @@ venv:
 
 create_passwd:
 	: # create variables into yml
-	: # ansible vault 
+	: # ansible vault
 	. venv/bin/activate && (\
                 ansible-vault create passwd.yml \
+	)
+
+change_passwd:
+	: # create variables into yml
+	: # ansible vault
+	. venv/bin/activate && (\
+                ansible-vault rekey passwd.yml \
+	)
 
 run:
 	: # commands
