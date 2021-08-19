@@ -7,10 +7,6 @@ install: venv
 	sudo apt-get install python3-pip
 	sudo pip3 install virtualenv
 
-	: # Create directories
-	mkdir -p /tmp/sql
-	cp sql/update_hist.sql /tmp/sql/
-
 	: # Activate venv and install smthing inside
 	. venv/bin/activate && pip install -r requirements.txt
 
@@ -34,7 +30,11 @@ change_passwd:
 	)
 
 run:
-	: # commands
+	: # create directories and copy script
+	mkdir -p /tmp/sql
+	cp sql/update_hist_alerta.sql /tmp/sql/
+
+	: # execute the playbook
 	. venv/bin/activate && (\
 		ansible-playbook -i hosts --ask-vault-pass --extra-vars '@passwd.yml' db-server-playbook.yml \
 	)
