@@ -16,8 +16,8 @@ echo YEARWEEK=${YEARWEEK} >> .var_file_names
 
 for file in sql/*output.sql
 do
-  cp "$file" "/tmp/${file/output.sql/update_hist_alerta_${DISEASE}_${YEARWEEK}.sql}"
+  cp "$file" "/tmp/${file/output.sql/update_hist_alerta_${YEARWEEK}_${DISEASE}.sql}"
   echo -e "Successfully renamed the file!"
 done
 
-echo -e "update_hist_alerta_${DISEASE}_${YEARWEEK}.sql work in progress.. \n"
+echo -e "update_hist_alerta_${YEARWEEK}_${DISEASE}.sql work in progress.. \n"
