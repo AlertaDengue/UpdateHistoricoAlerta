@@ -2,7 +2,7 @@
 - hosts: cluster
   vars:
     WORK_DIR: /tmp/sql/
-    SCRIPT_NAME: "update_hist_alerta_.sql"
+    SCRIPT_NAME: "update_hist_alerta_{{ lookup('env', 'DISEASE') }}_{{ lookup('env', 'YEARWEEK') }}.sql"
     LOG_PATH: /home/infodengue/logs/ansible/uploads_script.alerta.logs
     db_user: '{{ psql_user }}'
     db_name: '{{ psql_db }}'
