@@ -1,6 +1,7 @@
 [cluster]
 HETZNER ansible_host='{{ cluster_node_hetzner }}'
 # FGV ansible_host='{{ cluster_node_fgv }}'
+# FIOCRUZ ansible_host='{{ cluster_node_fiocruz }}'
 
 [cluster:vars]
 ansible_python_interpreter=/usr/bin/python3

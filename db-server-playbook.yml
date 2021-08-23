@@ -1,19 +1,28 @@
 ---
 - hosts: cluster
   vars:
+    WORK_DIR: /tmp/sql/
+    SCRIPT_NAME: "update_hist_alerta_.sql"
+    LOG_PATH: /home/infodengue/logs/ansible/uploads_script.alerta.logs
     db_user: '{{ psql_user }}'
     db_name: '{{ psql_db }}'
     db_password: '{{ psql_passwd }}'
 
   tasks:
+    - file:
+        path: /tmp/sql
+        state: directory
+        mode: 0755
     - name: copy sql files
       copy:
-        src: /tmp/sql/update_hist_alerta.sql
-        dest: /tmp/sql/update_hist_alerta.sql
+        src: '{{ WORK_DIR }}{{ SCRIPT_NAME }}'
+        dest: '{{ WORK_DIR }}{{ SCRIPT_NAME }}'
         owner: '{{ cluster_user_name }}'
         group: '{{ cluster_user_name }}'
         mode: '0644'
     - name: Add data to database
       become: true
       become_user: postgres
-      shell: psql {{ db_name }} < /tmp/sql/update_hist_alerta.sql
+      shell: psql {{ db_name }} < {{ WORK_DIR }}{{ SCRIPT_NAME }}
+    - name: Register upload in the log file
+      shell: echo "{{ lookup('pipe','date') }} ==> {{ SCRIPT_NAME }}" >> {{ LOG_PATH }}

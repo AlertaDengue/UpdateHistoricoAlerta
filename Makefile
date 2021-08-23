@@ -1,4 +1,8 @@
 # Makefile
+SHELL=/bin/bash
+include .var_file_names
+export
+
 
 all: install create_passwd run
 
@@ -29,11 +33,14 @@ change_passwd:
                 ansible-vault rekey passwd.yml \
 	)
 
-run:
-	: # create directories and copy script
-	mkdir -p /tmp/sql
-	cp sql/update_hist_alerta.sql /tmp/sql/
 
+set_file_names:
+	: # create directories and copy script
+	: # set +o allexport
+	./enter_filename.sh
+
+
+run:
 	: # execute the playbook
 	. venv/bin/activate && (\
 		ansible-playbook -i hosts --ask-vault-pass --extra-vars '@passwd.yml' db-server-playbook.yml \
