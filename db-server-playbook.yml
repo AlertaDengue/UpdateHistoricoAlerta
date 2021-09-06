@@ -11,7 +11,6 @@
     db_password: '{{ psql_passwd }}'
 
   tasks:
-
     - file:
         path: /tmp/sql
         state: directory
@@ -26,6 +25,12 @@
     - name: Add data to database
       become: true
       become_user: postgres
-      shell: psql {{ db_name }} < {{ WORK_DIR }}{{ SCRIPT_NAME }}
+      shell: time psql {{ db_name }} < {{ WORK_DIR }}{{ SCRIPT_NAME }} >> /tmp/output_sql_ansible.log
+      register: myshell_output
+    - name: copy the output to a local file
+      copy:
+        content: "{{ myshell_output.stdout }}"
+        dest: "/tmp/hello.txt"
+      delegate_to: localhost
     - name: Register upload in the log file
       shell: echo "{{ lookup('pipe','date') }} ==> {{ SCRIPT_NAME }}" >> {{ LOG_PATH }}
