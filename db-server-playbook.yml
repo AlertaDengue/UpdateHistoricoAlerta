@@ -15,7 +15,7 @@
         path: /tmp/sql
         state: directory
         mode: 0755
-    - name: copy sql files
+    - name: Copy script to server
       copy:
         src: '{{ WORK_DIR }}{{ SCRIPT_NAME }}'
         dest: '{{ WORK_DIR }}{{ SCRIPT_NAME }}'
@@ -25,12 +25,14 @@
     - name: Add data to database
       become: true
       become_user: postgres
-      shell: time psql {{ db_name }} < {{ WORK_DIR }}{{ SCRIPT_NAME }} >> /tmp/output_sql_ansible.log
+      shell: time psql {{ db_name }} < {{ WORK_DIR }}{{ SCRIPT_NAME }}
       register: myshell_output
-    - name: copy the output to a local file
-      copy:
-        content: "{{ myshell_output.stdout }}"
-        dest: "/tmp/hello.txt"
-      delegate_to: localhost
     - name: Register upload in the log file
       shell: echo "{{ lookup('pipe','date') }} ==> {{ SCRIPT_NAME }}" >> {{ LOG_PATH }}
+    - name: Remove script from sql folder
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_fileglob:
+        - sql/*.sql
+      delegate_to: localhost
