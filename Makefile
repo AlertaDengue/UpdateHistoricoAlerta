@@ -41,9 +41,15 @@ set_file_names:
 	: # set +o allexport
 	./enter_filename.sh
 
-
-run: set_file_names
+# First run get_file_names to create the file variable names
+run:
 	: # execute the playbook
 	source venv/bin/activate && (\
 	ansible-playbook -i hosts --ask-vault-pass --extra-vars '@passwd.yml' db-server-playbook.yml --verbose \
+	)
+
+history:
+	: # viewd history
+	source venv/bin/activate && (\
+	ansible servers -m command -a "cat /home/infodengue/logs/ansible/uploads_script.alerta.logs" \
 	)
