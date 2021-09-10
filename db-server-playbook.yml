@@ -17,6 +17,12 @@
         path: "{{ WORK_DIR }}"
         state: directory
         mode: 0755
+
+    - command: cp "{{ item }}" {{ WORK_DIR }}{{ SCRIPT_NAME }}
+      with_fileglob:
+        - sql/*.sql
+      delegate_to: localhost
+
     - name: Copy script to server
       copy:
         src: '{{ WORK_DIR }}{{ SCRIPT_NAME }}'
@@ -24,13 +30,16 @@
         owner: '{{ cluster_user_name }}'
         group: '{{ cluster_user_name }}'
         mode: '0644'
+
     - name: Add data to database
       become: true
       become_user: postgres
       shell: time psql {{ db_name }} < {{ WORK_DIR }}{{ SCRIPT_NAME }}
       register: myshell_output
+
     - name: Register upload in the log file
       shell: echo "{{ lookup('pipe','date') }} ==> {{ SCRIPT_NAME }}" >> {{ LOG_PATH }}
+
     - name: Remove script from sql folder
       file:
         path: "{{ item }}"

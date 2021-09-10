@@ -16,7 +16,7 @@ install: venv
 	: # Activate venv and install smthing inside
 	source venv/bin/activate && pip install -r requirements.txt
 
-venv:
+test_venv:
 	: # Create venv if it doesn't exist
 	: # test -d venv || virtualenv -p python3 --no-site-packages venv
 	test -d venv || python3 -m venv venv
@@ -34,7 +34,6 @@ change_passwd:
 	source venv/bin/activate && (\
 					ansible-vault rekey passwd.yml \
 	)
-
 
 set_file_names:
 	: # create directories and copy script
