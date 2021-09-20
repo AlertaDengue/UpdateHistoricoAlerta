@@ -14,4 +14,4 @@ read -p "Epidemic YearWeek: " YEARWEEK
 echo DISEASE=${DISEASE} > .var_file_names
 echo YEARWEEK=${YEARWEEK} >> .var_file_names
 
-echo -e "Updated variable names! \n"
+echo -e "Updated variable names ! \n"

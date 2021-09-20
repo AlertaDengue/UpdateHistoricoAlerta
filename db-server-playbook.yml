@@ -13,6 +13,7 @@
     db_password: '{{ psql_passwd }}'
 
   tasks:
+
     - file:
         path: "{{ WORK_DIR }}"
         state: directory
@@ -34,7 +35,7 @@
     - name: Add data to database
       become: true
       become_user: postgres
-      shell: time psql {{ db_name }} < {{ WORK_DIR }}{{ SCRIPT_NAME }}
+      shell: psql {{ db_name }} < {{ WORK_DIR }}{{ SCRIPT_NAME }}
       register: myshell_output
 
     - name: Register upload in the log file

@@ -4,7 +4,7 @@ HETZNER ansible_host='{{ cluster_node_hetzner }}'
 # FIOCRUZ ansible_host='{{ cluster_node_fiocruz }}'
 
 [cluster:vars]
-ansible_python_interpreter=/usr/bin/python3
+ansible_python_interpreter=/usr/bin/python
 ansible_user='{{ cluster_user_name }}'
 ansible_become=yes
 ansible_become_method=sudo
