@@ -35,7 +35,10 @@
     - name: Add data to database
       become: true
       become_user: postgres
-      shell: psql {{ db_name }} < {{ WORK_DIR }}{{ SCRIPT_NAME }}
+      shell: psql -h {{ psql_host }} \
+                  -p {{ psql_port }} \
+                  -U {{ psql_user }} \
+                  -d {{ db_name }} < {{ WORK_DIR }}{{ SCRIPT_NAME }}
       register: myshell_output
 
     - name: Register upload in the log file
