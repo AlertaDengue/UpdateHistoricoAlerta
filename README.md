@@ -8,7 +8,7 @@ make install
 ```
 #### Create an encrypted file with variables to connect to the server
 ```
-make create_passwd
+make create-passwd
 ```
 *Add your variable keys:*
 > simple vault example
@@ -25,7 +25,7 @@ psql_passwd: psqlpasswd
 ```
 #### How to change encrypted file variables? *(if necessary)*
 ```
-make change_passwd
+make change-passwd
 ```
 ####  Run the sql script on the target server
 ```
