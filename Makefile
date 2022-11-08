@@ -41,7 +41,7 @@ set_file_names:
 	./enter_filename.sh
 
 # First run get_file_names to create the file variable names
-run:
+run: set_file_names
 	: # execute the playbook
 	source venv/bin/activate && (\
 	ansible-playbook -i hosts --ask-vault-pass --extra-vars '@passwd.yml' db-server-playbook.yml --verbose \
