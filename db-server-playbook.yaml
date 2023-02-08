@@ -1,8 +1,8 @@
 ---
 - hosts: cluster
-  gather_facts: true
-
+  gather_facts: false
   vars:
+    desired_port: '{{ cluster_node_port }}'
     WORK_DIR: /tmp/sql/
     YEARWEEK: "{{ lookup('env', 'YEARWEEK') }}"
     DISEASE: "{{ lookup('env', 'DISEASE') }}"
@@ -13,6 +13,18 @@
     db_password: '{{ psql_passwd }}'
 
   tasks:
+    - name: check if ssh is running on {{ desired_port }}
+      delegate_to: localhost
+      wait_for:
+        port: "{{ desired_port }}"
+        host: "{{ ansible_host }}"
+        timeout: 10
+      ignore_errors: true
+      register: desired_port_check
+
+    - name: configure ansible to use port {{ desired_port }}
+      set_fact:
+        ansible_port: "{{ desired_port }}"
 
     - file:
         path: "{{ WORK_DIR }}"
@@ -23,6 +35,7 @@
       with_fileglob:
         - sql/*.sql
       delegate_to: localhost
+
 
     - name: Copy script to server
       copy:
