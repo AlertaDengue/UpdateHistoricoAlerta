@@ -25,21 +25,21 @@ create-vault-config:
 	: # create variables into yml
 	: # ansible vault
 	source venv/bin/activate && (\
-					ansible-vault create vault-config.yml \
+					ansible-vault create vault-config.yaml \
 	)
 
 change-vault-config:
 	: # create variables into yml
 	: # ansible vault
 	source venv/bin/activate && (\
-					ansible-vault edit vault-config.yml \
+					ansible-vault edit vault-config.yaml \
 	)
 
 change-vault-passwd:
 	: # create variables into yml
 	: # ansible vault
 	source venv/bin/activate && (\
-					ansible-vault rekey vault-config.yml \
+					ansible-vault rekey vault-config.yaml \
 	)
 
 set-vars-name:
@@ -51,7 +51,7 @@ set-vars-name:
 run: set-vars-name
 	: # execute the playbook
 	source venv/bin/activate && (\
-	ansible-playbook -i hosts --ask-vault-pass --extra-vars '@vault-config.yml' db-server-playbook.yaml --verbose \
+	ansible-playbook -i hosts --ask-vault-pass --extra-vars '@vault-config.yaml' db-server-playbook.yaml --verbose \
 	)
 
 history:
