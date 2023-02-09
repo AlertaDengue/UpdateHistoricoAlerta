@@ -39,7 +39,7 @@ env/
 venv/
 ENV/
 env.bak/
-passwd.yml
+vault-config.yaml
 
 # All
 *bkp/*

@@ -1,12 +1,12 @@
 # Makefile
 SHELL=/bin/bash
-include .var_file_names
-export
 
+disease:=
+yearweek:=
 
 all: install create-passwd run
 
-install: venv
+install:
 	: # Install virtualven
 	sudo apt-get install python3-venv
 	sudo apt-get install python3-pip
@@ -21,18 +21,25 @@ test-venv:
 	: # test -d venv || virtualenv -p python3 --no-site-packages venv
 	test -d venv || python3 -m venv venv
 
-create-passwd:
+create-vault-config:
 	: # create variables into yml
 	: # ansible vault
 	source venv/bin/activate && (\
-					ansible-vault create passwd.yml \
+					ansible-vault create vault-config.yaml \
 	)
 
-change-passwd:
+change-vault-config:
 	: # create variables into yml
 	: # ansible vault
 	source venv/bin/activate && (\
-					ansible-vault rekey passwd.yml \
+					ansible-vault edit vault-config.yaml \
+	)
+
+change-vault-passwd:
+	: # create variables into yml
+	: # ansible vault
+	source venv/bin/activate && (\
+					ansible-vault rekey vault-config.yaml \
 	)
 
 set-vars-name:
@@ -41,10 +48,10 @@ set-vars-name:
 	./enter_filename.sh
 
 # First run get_file_names to create the file variable names
-run: set-vars-name
+run:
 	: # execute the playbook
 	source venv/bin/activate && (\
-	ansible-playbook -i hosts --ask-vault-pass --extra-vars '@passwd.yml' db-server-playbook.yml --verbose \
+		ansible-playbook -i hosts --ask-vault-pass --extra-vars '@vault-config.yaml' -e 'disease=${disease} yearweek=${yearweek}' db-server-playbook.yaml \
 	)
 
 history:
