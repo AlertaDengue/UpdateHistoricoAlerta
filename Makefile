@@ -3,6 +3,8 @@ SHELL=/bin/bash
 include .var_file_names
 export
 
+disease:=
+yearweek:=
 
 all: install create-passwd run
 
@@ -48,10 +50,10 @@ set-vars-name:
 	./enter_filename.sh
 
 # First run get_file_names to create the file variable names
-run: set-vars-name
+run:
 	: # execute the playbook
 	source venv/bin/activate && (\
-	ansible-playbook -i hosts --ask-vault-pass --extra-vars '@vault-config.yaml' db-server-playbook.yaml --verbose \
+		ansible-playbook -i hosts --ask-vault-pass --extra-vars '@vault-config.yaml' -e 'disease=${disease} yearweek=${yearweek}' db-server-playbook.yaml \
 	)
 
 history:

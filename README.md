@@ -27,6 +27,12 @@ psql_user: psqluser
 psql_passwd: psqlpasswd
 ```
 
+####  Run the sql script on the target server
+*Note that the **disease** variables and **yearweek** are defined following the **make run** command*
+```
+make run disease=zika yearweek=201609
+```
+
 #### How to change encrypted file variables? *(if necessary)*
 ```
 make change-vault-config
@@ -38,7 +44,3 @@ make change-vault-config
 make change-vault-passwd
 ```
 
-####  Run the sql script on the target server
-```
-make run
-```
