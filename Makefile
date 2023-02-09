@@ -1,7 +1,5 @@
 # Makefile
 SHELL=/bin/bash
-include .var_file_names
-export
 
 disease:=
 yearweek:=
