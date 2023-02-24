@@ -1,0 +1,26 @@
+---
+- name: Create directories
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    username: "{{ lookup('env', 'USER') }}"
+
+
+  tasks:
+  - name: Check if output directory exists
+    stat:
+      path: /tmp/sql/
+    register: output_folder
+
+  - name: Create output directory if not exists
+    file:
+      path: /tmp/sql/
+      state: directory
+      owner: "{{ username }}"
+      group: "{{ username }}"
+      mode: 0775
+    when: output_folder.stat.exists == false
+
+- name: Include a play for the tasks
+  ansible.builtin.import_playbook: run-server-tasks.yaml
