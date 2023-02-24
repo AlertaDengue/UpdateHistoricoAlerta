@@ -40,11 +40,6 @@ change-vault-passwd:
 					ansible-vault rekey vault-config.yaml \
 	)
 
-set-vars-name:
-	: # create directories and copy script
-	: # set +o allexport
-	./enter_filename.sh
-
 run:
 	: # execute the playbook
 	source venv/bin/activate && (\
