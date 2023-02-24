@@ -12,8 +12,9 @@
     db_name: '{{ psql_db }}'
     db_password: '{{ psql_passwd }}'
 
+
   tasks:
-    - name: check if ssh is running on {{ desired_port }}
+    - name: Check if ssh is running on {{ desired_port }}
       delegate_to: localhost
       wait_for:
         port: "{{ desired_port }}"
@@ -22,7 +23,7 @@
       ignore_errors: true
       register: desired_port_check
 
-    - name: configure ansible to use port {{ desired_port }}
+    - name: Configure ansible to use port {{ desired_port }}
       set_fact:
         ansible_port: "{{ desired_port }}"
 
@@ -35,7 +36,6 @@
       with_fileglob:
         - sql/*.sql
       delegate_to: localhost
-
 
     - name: Copy script to server
       copy:

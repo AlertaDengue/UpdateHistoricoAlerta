@@ -4,8 +4,6 @@ SHELL=/bin/bash
 disease:=
 yearweek:=
 
-all: install create-passwd run
-
 install:
 	: # Install virtualven
 	sudo apt-get install python3-venv
@@ -47,11 +45,11 @@ set-vars-name:
 	: # set +o allexport
 	./enter_filename.sh
 
-# First run get_file_names to create the file variable names
 run:
 	: # execute the playbook
 	source venv/bin/activate && (\
-		ansible-playbook -i hosts --ask-vault-pass --extra-vars '@vault-config.yaml' -e 'disease=${disease} yearweek=${yearweek}' db-server-playbook.yaml \
+		ansible-playbook -i hosts --ask-vault-pass --extra-vars '@vault-config.yaml' \
+			-e 'yearweek=${yearweek} disease=${disease}' prepare_hosts.yaml --verbose \
 	)
 
 history:
