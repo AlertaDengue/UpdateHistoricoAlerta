@@ -44,7 +44,7 @@ run:
 	: # execute the playbook
 	source venv/bin/activate && (\
 		ansible-playbook -i hosts --ask-vault-pass --extra-vars '@vault-config.yaml' \
-			-e 'yearweek=${yearweek} disease=${disease}' prepare_hosts.yaml --verbose \
+			-e 'yearweek=${yearweek} disease=${disease}' prepare_hosts.yaml \
 	)
 
 history:
