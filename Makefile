@@ -40,11 +40,11 @@ change-vault-passwd:
 					ansible-vault rekey vault-config.yaml \
 	)
 
-run:
+update_alertas:
 	: # execute the playbook
 	source venv/bin/activate && (\
 		ansible-playbook -i hosts --ask-vault-pass --extra-vars '@vault-config.yaml' \
-			-e 'yearweek=${yearweek} disease=${disease}' prepare_hosts.yaml \
+			-e 'yearweek=${yearweek} disease=${disease}' prepare_alerta_hosts.yaml \
 	)
 
 history:
