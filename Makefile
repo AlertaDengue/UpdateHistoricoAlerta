@@ -36,14 +36,23 @@ change-vault-passwd:
 	# Change the password of the vault configuration file
 	source $(venv_dir)/bin/activate && ansible-vault rekey $(vault_config)
 
+##
 update-alertas:
 	# Execute the playbook to update alerts
 	source $(venv_dir)/bin/activate && \
 	ansible-playbook -i $(hosts_dir) --ask-vault-pass \
 	--extra-vars "@$(vault_config)" -e "yearweek=$(yearweek) disease=$(disease)" \
-	$(playbooks_dir)/prepare_alerta_hosts.yaml
+	$(playbooks_dir)/historico-alert-prepare-hosts.yaml  --verbose
 
 history:
 	# View the history
 	source $(venv_dir)/bin/activate && \
 	ansible servers -m command -a "cat /var/log/ansible/system_update_epiweeks.log"
+
+##
+sync-maps:
+	# execute the playbook
+	source $(venv_dir)/bin/activate && \
+	ansible-playbook -i $(hosts_dir) --ask-vault-pass \
+	--extra-vars "@$(vault_config)" \
+	$(playbooks_dir)/incidence-map-upload.yaml --verbose
