@@ -2,15 +2,15 @@
 - hosts: cluster
   gather_facts: false
   vars:
-    desired_port: '{{ cluster_node_port }}'
-    yearweek: '{{ yearweek }}'
-    disease: '{{ disease }}'
-    db_user: '{{ psql_user }}'
-    db_name: '{{ psql_db }}'
-    db_password: '{{ psql_passwd }}'
+    desired_port: "{{ cluster_node_port }}"
+    yearweek: "{{ yearweek }}"
+    disease: "{{ disease }}"
+    db_user: "{{ psql_user }}"
+    db_name: "{{ psql_db }}"
+    db_password: "{{ psql_passwd }}"
     SRC_DIR: /tmp/sql
     DEST_DIR: /tmp/sql
-    SQL_FNAME: 'update_hist_alerta_{{ yearweek }}_{{ disease }}.sql'
+    SQL_FNAME: "update_hist_alerta_{{ yearweek }}_{{ disease }}.sql"
     SCRIPT_NAME: update_historico_alerta.sh
     SCRIPT_DIR: /opt/services/AlertaDengue
     LOG_PATH: /var/log/ansible
@@ -19,33 +19,33 @@
     - name: Check if ssh is running on {{ desired_port }}
       delegate_to: localhost
       wait_for:
-        port: '{{ desired_port }}'
-        host: '{{ ansible_host }}'
+        port: "{{ desired_port }}"
+        host: "{{ ansible_host }}"
         timeout: 10
       ignore_errors: true
       register: desired_port_check
 
     - name: Configure ansible to use port {{ desired_port }}
       set_fact:
-        ansible_port: '{{ desired_port }}'
+        ansible_port: "{{ desired_port }}"
 
     - file:
-        path: '{{ SRC_DIR }}'
+        path: "{{ SRC_DIR }}"
         state: directory
         mode: 0755
 
-    - command: cp '{{ item }}' {{ SRC_DIR }}/{{ SQL_FNAME }}
+    - command: cp "{{ item }}" {{ SRC_DIR }}/{{ SQL_FNAME }}
       with_fileglob:
         - ../ansible/roles/hist-alertas-update/scripts/sql/*.sql
       delegate_to: localhost
 
     - name: Copy script to server
       copy:
-        src: '{{ SRC_DIR }}/{{ SQL_FNAME }}'
-        dest: '{{ DEST_DIR }}/{{ SQL_FNAME }}'
-        owner: '{{ cluster_user_name }}'
-        group: '{{ cluster_user_name }}'
-        mode: '0644'
+        src: "{{ SRC_DIR }}/{{ SQL_FNAME }}"
+        dest: "{{ DEST_DIR }}/{{ SQL_FNAME }}"
+        owner: "{{ cluster_user_name }}"
+        group: "{{ cluster_user_name }}"
+        mode: "0644"
 
     - name: Add data to database
       become: true
@@ -64,7 +64,7 @@
 
     - name: Remove script from sql folder
       file:
-        path: '{{ item }}'
+        path: "{{ item }}"
         state: absent
       with_fileglob:
         - ../ansible/roles/hist-alertas-update/scripts/sql/*.sql
@@ -72,4 +72,4 @@
       delegate_to: localhost
 
     - name: Register upload in the log file
-      shell: echo '{{ lookup('pipe','date') }} ==> {{ SQL_FNAME }}' >> {{ LOG_PATH }}/system_update_epiweeks.log 2>&1
+      shell: echo "{{ lookup('pipe','date') }} ==> {{ SQL_FNAME }}" >> {{ LOG_PATH }}/system_update_epiweeks.log 2>&1

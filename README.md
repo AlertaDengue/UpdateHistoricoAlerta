@@ -55,8 +55,6 @@
 ___
 ### incidence-map-upload.yaml
 
-Synchronize Map Images Directory and Execute Script
-
 *This playbook is responsible for synchronizing map images from a source directory to a destination directory on remote servers and executing a script. It targets the 'cluster' group of hosts.*
 
 ### Playbook Tasks:
@@ -99,7 +97,7 @@ Replace *<target>* with one of the following available targets:
 - Creates and activates a Python virtual environment (`venv`) and installs project-specific dependencies listed in `requirements.txt`.
 
 #### `test-venv`:
-- Creates the Python virtual environment (`venv`) if it doesn't already exist.
+- Creates the Python virtual environment (`venv`) if it doesn't already exist and test it.
 
 #### `create-vault-config`:
 - Creates a new vault configuration file using `ansible-vault create`. This file is used for securely storing sensitive data.
@@ -124,7 +122,7 @@ Replace *<target>* with one of the following available targets:
 make install        # Install system dependencies and create a virtual environment.
 make update-alertas disease=dengue yearweek=209588  # Execute the playbook to update alerts.
 make sync-maps # Execute the playbook to synchronize the incidence map images.
-make create-vault-config # See the vault-template for your variable .
+make create-vault-config # See the vault-template in the "ansible/config" directory to configure your variables.
 ```
 
 --- 

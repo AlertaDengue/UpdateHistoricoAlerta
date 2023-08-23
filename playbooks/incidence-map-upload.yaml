@@ -25,4 +25,4 @@
         chdir: "{{ SCRIPT_DIR }}"
 
     - name: Register sent images in the log file
-      shell: echo '{{ lookup('pipe','date') }} ==> {{ SCRIPT_NAME }}' >> {{ LOG_PATH }}/system_update_epiweeks.log 2>&1
+      shell: echo "{{ lookup('pipe','date') }} ==> {{ SCRIPT_NAME }}" >> {{ LOG_PATH }}/system_update_epiweeks.log 2>&1
