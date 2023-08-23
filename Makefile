@@ -1,10 +1,10 @@
-# Makefile
 SHELL=/bin/bash
 venv_dir := venv
+hosts_dir := ansible/config/hosts
 playbooks_dir := playbooks
 tasks_dir := ansible/roles/maps-upload/tasks
 roles_dir := ansible/roles
-vault_config := ansible/vault-config.yaml
+vault_config := ansible/config/vault-config.yaml
 
 disease :=
 yearweek :=
@@ -38,8 +38,12 @@ change-vault-passwd:
 
 update-alertas:
 	# Execute the playbook to update alerts
-	source $(venv_dir)/bin/activate && ansible-playbook -i ansible/hosts --ask-vault-pass --extra-vars "@$(vault_config)" -e "yearweek=$(yearweek) disease=$(disease)" $(playbooks_dir)/prepare_alerta_hosts.yaml
+	source $(venv_dir)/bin/activate && \
+	ansible-playbook -i $(hosts_dir) --ask-vault-pass \
+	--extra-vars "@$(vault_config)" -e "yearweek=$(yearweek) disease=$(disease)" \
+	$(playbooks_dir)/prepare_alerta_hosts.yaml
 
 history:
 	# View the history
-	source $(venv_dir)/bin/activate && ansible servers -m command -a "cat /home/infodengue/logs/ansible/uploads_script.alerta.logs"
+	source $(venv_dir)/bin/activate && \
+	ansible servers -m command -a "cat /var/log/ansible/system_update_epiweeks.log"
