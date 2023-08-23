@@ -34,7 +34,7 @@
 
     - command: cp '{{ item }}' {{ SRC_DIR }}/{{ SCRIPT_NAME }}
       with_fileglob:
-        - sql/*.sql
+        - ../ansible/roles/maps-upload/files/sql/*.sql
       delegate_to: localhost
 
     - name: Copy script to server
@@ -61,6 +61,6 @@
         path: '{{ item }}'
         state: absent
       with_fileglob:
-        - sql/*.sql
+        - ../ansible/roles/maps-upload/files/sql/*.sql
         - /tmp/sql/*.sql
       delegate_to: localhost
