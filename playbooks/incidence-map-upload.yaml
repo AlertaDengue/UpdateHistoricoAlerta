@@ -1,0 +1,28 @@
+- name: Synchronize Map Images Directory and Execute Script
+  hosts: cluster
+  gather_facts: true
+
+  vars:
+    SCRIPT_NAME: sync_incidence_maps.sh
+    SCRIPT_DIR: /opt/services/AlertaDengue
+    ROLE_MAPS_DIR: ../ansible/roles/maps-upload
+    SRC_DIR: '{{ ROLE_MAPS_DIR }}/images/incidence_maps/'
+    DEST_DIR: /Storage/infodengue_data/img/incidence_maps/
+    LOG_PATH: /var/log/ansible
+
+  tasks:
+    - name: Synchronize Map Images Directory
+      synchronize:
+        src: "{{ SRC_DIR }}"
+        dest: "{{ DEST_DIR }}"
+      delegate_to: localhost
+
+    - name: Execute Script on Server
+      become: true
+      become_user: administrador
+      shell: "nohup ./{{ SCRIPT_NAME }}"
+      args:
+        chdir: "{{ SCRIPT_DIR }}"
+
+    - name: Register sent images in the log file
+      shell: echo "{{ lookup('pipe','date') }} ==> {{ SCRIPT_NAME }}" >> {{ LOG_PATH }}/system_update_epiweeks.log 2>&1

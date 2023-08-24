@@ -23,4 +23,4 @@
     when: output_folder.stat.exists == false
 
 - name: Include a play for the tasks
-  ansible.builtin.import_playbook: run-server-tasks.yaml
+  ansible.builtin.import_playbook: historico-alert-update.yaml

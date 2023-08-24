@@ -1,54 +1,58 @@
-# Makefile
 SHELL=/bin/bash
+venv_dir := venv
+hosts_dir := ansible/config/hosts
+playbooks_dir := playbooks
+tasks_dir := ansible/roles/maps-upload/tasks
+roles_dir := ansible/roles
+vault_config := ansible/config/vault-config.yaml
 
-disease:=
-yearweek:=
+disease :=
+yearweek :=
+
+.PHONY: install test-venv create-vault-config change-vault-config change-vault-passwd update-alertas history
 
 install:
-	: # Install virtualven
-	sudo apt-get install python3-venv
-	sudo apt-get install python3-pip
-	sudo pip3 install virtualenv
-	python3 -m venv venv
+	# Install system dependencies
+	sudo apt-get update
+	sudo apt-get install -y python3-venv python3-pip
 
-	: # Activate venv and install smthing inside
-	source venv/bin/activate && pip install -r requirements.txt
+	# Create and activate the virtual environment
+	python3 -m venv $(venv_dir)
+	source $(venv_dir)/bin/activate && pip install -r requirements.txt
 
 test-venv:
-	: # Create venv if it doesn't exist
-	: # test -d venv || virtualenv -p python3 --no-site-packages venv
-	test -d venv || python3 -m venv venv
+	# Create the virtual environment if it doesn't exist
+	test -d $(venv_dir) || python3 -m venv $(venv_dir)
 
 create-vault-config:
-	: # create variables into yml
-	: # ansible vault
-	source venv/bin/activate && (\
-					ansible-vault create vault-config.yaml \
-	)
+	# Create the vault configuration file
+	source $(venv_dir)/bin/activate && ansible-vault create $(vault_config)
 
 change-vault-config:
-	: # create variables into yml
-	: # ansible vault
-	source venv/bin/activate && (\
-					ansible-vault edit vault-config.yaml \
-	)
+	# Edit the vault configuration file
+	source $(venv_dir)/bin/activate && ansible-vault edit $(vault_config)
 
 change-vault-passwd:
-	: # create variables into yml
-	: # ansible vault
-	source venv/bin/activate && (\
-					ansible-vault rekey vault-config.yaml \
-	)
+	# Change the password of the vault configuration file
+	source $(venv_dir)/bin/activate && ansible-vault rekey $(vault_config)
 
-run:
-	: # execute the playbook
-	source venv/bin/activate && (\
-		ansible-playbook -i hosts --ask-vault-pass --extra-vars '@vault-config.yaml' \
-			-e 'yearweek=${yearweek} disease=${disease}' prepare_hosts.yaml \
-	)
+##
+update-alertas:
+	# Execute the playbook to update alerts
+	source $(venv_dir)/bin/activate && \
+	ansible-playbook -i $(hosts_dir) --ask-vault-pass \
+	--extra-vars "@$(vault_config)" -e "yearweek=$(yearweek) disease=$(disease)" \
+	$(playbooks_dir)/historico-alert-prepare-hosts.yaml  --verbose
 
 history:
-	: # viewd history
-	source venv/bin/activate && (\
-	ansible servers -m command -a "cat /home/infodengue/logs/ansible/uploads_script.alerta.logs" \
-	)
+	# View the history
+	source $(venv_dir)/bin/activate && \
+	ansible servers -m command -a "cat /var/log/ansible/system_update_epiweeks.log"
+
+##
+sync-maps:
+	# execute the playbook
+	source $(venv_dir)/bin/activate && \
+	ansible-playbook -i $(hosts_dir) --ask-vault-pass \
+	--extra-vars "@$(vault_config)" \
+	$(playbooks_dir)/incidence-map-upload.yaml --verbose
