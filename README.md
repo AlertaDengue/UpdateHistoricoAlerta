@@ -20,21 +20,21 @@
 
 ### Playbook Tasks:
 1. **Create Directories**: This playbook checks if an output directory (`/tmp/sql/`) exists on the local machine (`localhost`). If the directory doesn't exist, it creates it. This task is used to ensure the required directory structure is in place.
-2. **Include a Play for the Tasks**: This task includes another playbook, `historico-alert-update.yaml`, that contains the specific tasks for updating historical alerts. This is done using the `ansible.builtin.import_playbook` module. It effectively extends the execution by incorporating tasks from the included playbook.
+2. **Include a Play for the Tasks**: This task includes another playbook, `historico-alert-update.yaml`, that contains the specific tasks for updating historical alerts data.. This is done using the `ansible.builtin.import_playbook` module. It effectively extends the execution by incorporating tasks from the included playbook.
 
 ### Variables:
 - `username`: This variable is set to the username of the user running the playbook on the local machine.
 
-**Note**: The playbook serves as a preparation step before executing more complex tasks related to updating historical alerts, which are defined in the included playbook (`historico-alert-update.yaml`).
+**Note**: The playbook serves as a preparation step before executing more complex tasks related to updating historical alerts data., which are defined in the included playbook (`historico-alert-update.yaml`).
 
 ---
 ### historico-alert-update.yaml
-*This playbook is responsible for updating historical alerts on a cluster of hosts. It is designed to run tasks in parallel on multiple hosts specified in the 'cluster' group.*
+*This playbook is responsible for updating historical alerts data. on a cluster of hosts. It is designed to run tasks in parallel on multiple hosts specified in the 'cluster' group.*
 ### Playbook Tasks:
 1. **Check SSH Availability**: This task checks if SSH is running on the specified `desired_port` for each host in the cluster. It verifies SSH availability on each host before proceeding with other tasks.
 2. **Configure Ansible Port**: Ansible dynamically sets the `ansible_port` based on the `desired_port`, ensuring that Ansible communicates with the correct SSH port on each host.
 3. **Create Directories**: This task ensures that the required directories (`SRC_DIR`) for SQL files exist on the local machine (`localhost`). If not, it creates the directories.
-4. **Copy SQL Files**: SQL files from the role's scripts directory (`../ansible/roles/hist-alertas-update/scripts/sql/*.sql`) are copied to the local `SRC_DIR`. These SQL files are later used to update historical alerts in the database.
+4. **Copy SQL Files**: SQL files from the role's scripts directory (`../ansible/roles/hist-alertas-update/scripts/sql/*.sql`) are copied to the local `SRC_DIR`. These SQL files are later used to update historical alerts data. in the database.
 5. **Copy Script to Server**: The SQL file (`SQL_FNAME`) is copied to the destination directory (`DEST_DIR`) on each cluster node. Ownership and permissions are set for the copied file.
 6. **Add Data to Database**: This task runs the SQL script on the PostgreSQL database. It utilizes the `psql` command to connect to the database and execute the SQL file.
 7. **Execute Script on Server**: The playbook executes a Bash script (`SCRIPT_NAME`) on each cluster node. The script's execution is detached with `nohup` to ensure it continues running even if the SSH session ends. It is run with elevated privileges (`administrador` user).
@@ -43,8 +43,8 @@
 
 ### Variables:
 - `desired_port`: The desired SSH port for the cluster nodes.
-- `yearweek`: The year and week for which the historical alerts are being updated.
-- `disease`: The specific disease for which historical alerts are being updated.
+- `yearweek`: The year and week for which the historical alerts data. are being updated.
+- `disease`: The specific disease for which historical alerts data. are being updated.
 - `db_user`, `db_name`, `db_password`: Database connection details.
 - `SRC_DIR`, `DEST_DIR`: Directories for storing SQL files on the local and remote machines.
 - `SQL_FNAME`: The name of the SQL file generated based on the year, week, and disease.
