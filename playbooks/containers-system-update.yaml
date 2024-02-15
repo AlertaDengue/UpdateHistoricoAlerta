@@ -1,0 +1,32 @@
+---
+- name: Update database and deploy container services
+  hosts: cluster
+  gather_facts: true
+
+  vars:
+    SCRIPT_UPDATE_TABLES: update_historico_alerta.sh
+    SCRIPT_UPDATE_STAGING:  update_staging.sh
+    SCRIPT_PROD_DIR: /opt/services/alertadengue
+    SCRIPT_STAGING_DIR: /opt/services/staging_AlertaDengue
+    LOG_PATH: /var/log/ansible
+
+  tasks:
+    - name: Execute {{ SCRIPT_UPDATE_TABLES }} Script on Server
+      become: true
+      become_user: administrador
+      shell: "nohup ./{{ SCRIPT_UPDATE_TABLES }}"
+      args:
+        chdir: "{{ SCRIPT_STAGING_DIR }}"
+
+    - name: Execute {{ SCRIPT_UPDATE_STAGING }} Script on Server
+      become: true
+      become_user: administrador
+      shell: "nohup ./{{ SCRIPT_UPDATE_STAGING }}"
+      args:
+        chdir: "{{ SCRIPT_STAGING_DIR }}"
+
+    - name: Register staging update in the log file
+      shell: echo "{{ lookup('pipe','date') }} ==> {{ SCRIPT_UPDATE_TABLES }}" >> {{ LOG_PATH }}/system_update_tables.log 2>&1
+
+    - name: Register sent images in the log file
+      shell: echo "{{ lookup('pipe','date') }} ==> {{ SCRIPT_UPDATE_STAGING }}" >> {{ LOG_PATH }}/system_update_staging.log 2>&1

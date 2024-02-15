@@ -11,7 +11,6 @@
     SRC_DIR: /tmp/sql
     DEST_DIR: /tmp/sql
     SQL_FNAME: "update_hist_alerta_{{ yearweek }}_{{ disease }}.sql"
-    SCRIPT_NAME: update_historico_alerta.sh
     SCRIPT_DIR: /opt/services/AlertaDengue
     LOG_PATH: /var/log/ansible
 
@@ -54,13 +53,6 @@
                   -p {{ psql_port }} \
                   -U {{ psql_user }} \
                   -d {{ db_name }} -f {{ DEST_DIR }}/{{ SQL_FNAME }}
-
-    - name: Execute Script on Server
-      become: true
-      become_user: administrador
-      shell: "nohup ./{{ SCRIPT_NAME }}"
-      args:
-        chdir: "{{ SCRIPT_DIR }}"
 
     - name: Remove script from sql folder
       file:
