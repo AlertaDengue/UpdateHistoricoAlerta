@@ -9,6 +9,7 @@
     - [historico-alert-prepare-hosts.yaml](#incidence-map-uploadyaml)
     - [historico-alert-update.yaml](#historico-alert-updateyaml)
     - [incidence-map-upload.yaml](#incidence-map-uploadyaml)
+    - [incidence-map-upload.yaml](#containers-system-updateyaml)
 - [Installation](#installation)
 - [Usage - (Makefile)](#usage)
 
@@ -72,58 +73,97 @@ ___
 
 **Note**: The playbook assumes the existence of the `sync_incidence_maps.sh` script in the specified directory and the availability of the necessary permissions to execute the script.
 ___
-## Installation
 
-### Example installation steps
+### containers-system-update.yaml
+
+This playbook updates the database and deploys container services by executing scripts on the server and logging the operations. It is designed for operations requiring database updates and container deployment across a cluster of hosts.
+
+#### Playbook Tasks:
+
+1. **Execute Update Script**: Executes a script to update historical alert data in the database.
+2. **Execute Staging Script**: Deploys updated data to a staging environment for testing.
+3. **Log Updates**: Records the completion of the database update process in the system log.
+4. **Log Deployment**: Records the deployment of container services in the system log.
+
+### Variables:
+
+- `SCRIPT_UPDATE_TABLES`: The script for updating tables in the database.
+- `SCRIPT_UPDATE_STAGING`: The script for updating the staging environment.
+- `SCRIPT_PROD_DIR`: The production directory for AlertaDengue services.
+- `SCRIPT_STAGING_DIR`: The staging directory for AlertaDengue services.
+- `LOG_PATH`: The path to where log files are stored.
+
+**Note**: This playbook ensures that database updates and container deployments are executed smoothly and logged for audit and tracking purposes.
+
+---
+## Get Started!
+
+### Installation steps
+
+For development, we encourage you to use `conda`. If you don't know
+what is that, check these links:
+
+* In Spanish: https://opensciencelabs.org/blog/como-instalar-y-comenzar-utilizar-conda/
+* In English: https://cloudsmith.com/blog/what-is-conda/
+
+We recommend you to use mamba-forge, a combination of
+miniconda + conda-forge + mamba. You can download it from here:
+https://github.com/conda-forge/miniforge#mambaforge
+
+Here’s how to set up UpdateHistoricoAlerta for local environment.
+
+1. Clone this repository locally:
 ```bash
-sudo apt-get update
-sudo apt-get install -y python3-venv python3-pip make
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-``` 
-## Usage (Makefile)
+$ git clone git@github.com:AlertaDengue/UpdateHistoricoAlerta.git
+```
+2. Create a conda environment and activate it:
+```bash
+$ cd UpdateHistoricoAlerta
+$ mamba env create --file conda/base.yaml
+```
+and
+```bash
+$ conda activate update-alertas
+```
 
-*To use the `Makefile`, you need to have `make` installed on your system. You can execute the defined targets by running the following command in your project directory*
+## Usage (Makim)
+
+*To use the `Makim`, you need to have `makim` installed on your system. You can execute the defined targets by running the following command in your project directory*
 
 ```bash
-make <target>
+makim <target>
+# to visualize all makim commands execute:
+makim --help
+# to install maki autocompletions execute:
+makim --install-autocompletion
 ``` 
 
 Replace *<target>* with one of the following available targets:
 
-#### `install`:
-- Installs system dependencies, including `python3-venv` and `python3-pip`.
-- Creates and activates a Python virtual environment (`venv`) and installs project-specific dependencies listed in `requirements.txt`.
-
-#### `test-venv`:
-- Creates the Python virtual environment (`venv`) if it doesn't already exist and test it.
-
-#### `create-vault-config`:
+#### `vault.create-vault-config`:
 - Creates a new vault configuration file using `ansible-vault create`. This file is used for securely storing sensitive data.
 
-#### `change-vault-config`:
+#### `vault.change-vault-config`:
 - Edits the existing vault configuration file using `ansible-vault edit`. You can modify sensitive data securely.
 
-#### `change-vault-passwd`:
+#### `vault.change-vault-passwd`:
 - Changes the password of the vault configuration file for added security.
 
-#### `update-alertas`:
+#### `ansible.update-alertas`:
 - Executes an Ansible playbook to update alerts. It activates the virtual environment, prompts for a vault password, and runs the `historico-alert-prepare-hosts.yaml` playbook with additional variables, such as `yearweek` and `disease`, specified via the `-e` option.
 
-#### `history`:
+#### `ansible.history`:
 - Allows you to view the execution history of Ansible tasks. It activates the virtual environment and uses the `ansible` command to run a task (`cat /var/log/ansible/system_update_epiweeks.log`) on your servers to display the log.
 
-#### `sync-maps`:
+#### `ansible.sync-maps`:
 - Executes an Ansible playbook to synchronize map images. Similar to the `update-alertas` target, it activates the virtual environment, prompts for a vault password, and runs the `incidence-map-upload.yaml` playbook to synchronize map images.
 
 ### Example usage:
 ```bash
-make install        # Install system dependencies and create a virtual environment.
-make update-alertas disease=dengue yearweek=209588  # Execute the playbook to update alerts.
-make sync-maps # Execute the playbook to synchronize the incidence map images.
-make create-vault-config # See the vault-template in the "ansible/config" directory to configure your variables.
+makim ansible.update-alertas --disease dengue --yearweek 202406 # Execute the playbook to update alerts.
+makim ansible.sync-maps # Execute the playbook to synchronize the incidence map images.
+makim ansible.create-vault-config # See the vault-template in the "ansible/config" directory to configure your variables.
+makim ansible.history --logfile incidence_maps_update.log #
+makim ansible.containers-system-update $
 ```
-
 --- 
-
