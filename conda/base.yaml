@@ -1,0 +1,9 @@
+name: update-alertas
+channels:
+  - nodefaults
+  - conda-forge
+dependencies:
+  - pip
+  - makim
+  - ansible
+  - make
