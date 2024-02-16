@@ -6,7 +6,6 @@
   vars:
     username: "{{ lookup('env', 'USER') }}"
 
-
   tasks:
   - name: Check if output directory exists
     stat:

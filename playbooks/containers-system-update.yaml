@@ -16,7 +16,7 @@
       become_user: administrador
       shell: "nohup ./{{ SCRIPT_UPDATE_TABLES }}"
       args:
-        chdir: "{{ SCRIPT_PROD_DIR }}"
+        chdir: "{{ SCRIPT_STAGING_DIR }}"
 
     - name: Execute {{ SCRIPT_UPDATE_STAGING }} Script on Server
       become: true
@@ -26,7 +26,7 @@
         chdir: "{{ SCRIPT_STAGING_DIR }}"
 
     - name: Register staging update in the log file
-      shell: echo "{{ lookup('pipe','date') }} ==> {{ SCRIPT_UPDATE_TABLES }}" >> {{ LOG_PATH }}/system_update_tables.log 2>&1
+      shell: echo "{{ lookup('pipe','date') }} ==> Synchronize All Tables Successfully" >> {{ LOG_PATH }}/system_update_tables.log 2>&1
 
     - name: Register sent images in the log file
-      shell: echo "{{ lookup('pipe','date') }} ==> {{ SCRIPT_UPDATE_STAGING }}" >> {{ LOG_PATH }}/system_update_staging.log 2>&1
+      shell: echo "{{ lookup('pipe','date') }} ==> Build and Deploy All Containers Successfully" >> {{ LOG_PATH }}/system_update_staging.log 2>&1

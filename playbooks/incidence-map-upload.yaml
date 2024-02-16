@@ -1,3 +1,4 @@
+---
 - name: Synchronize Map Images Directory and Execute Script
   hosts: cluster
   gather_facts: true
@@ -5,7 +6,7 @@
   vars:
     ROLE_MAPS_DIR: ../ansible/roles/maps-upload
     SRC_DIR: '{{ ROLE_MAPS_DIR }}/images/incidence_maps/'
-    DEST_DIR: /Storage/infodengue_data/img/incidence_maps/
+    DEST_DIR: /Storage/staging_data/img/incidence_maps
     LOG_PATH: /var/log/ansible
 
   tasks:
@@ -14,3 +15,7 @@
         src: "{{ SRC_DIR }}"
         dest: "{{ DEST_DIR }}"
       delegate_to: localhost
+
+    - name: Register sent images in the log file
+      shell: echo "{{ lookup('pipe','date') }} ==> Synchronize Map Images Successfully" >> {{ LOG_PATH }}/incidence_maps_update.log 2>&1
+

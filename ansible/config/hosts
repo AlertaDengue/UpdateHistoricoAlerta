@@ -9,3 +9,4 @@ ansible_user='{{ cluster_user_name }}'
 ansible_become=yes
 ansible_become_method=sudo
 ansible_become_pass='{{ cluster_sudo_passwd }}'
+cluster_user_name='{{ cluster_user_name }}'
