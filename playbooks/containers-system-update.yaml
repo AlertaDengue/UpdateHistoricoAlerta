@@ -16,7 +16,7 @@
       become_user: administrador
       shell: "nohup ./{{ SCRIPT_UPDATE_TABLES }}"
       args:
-        chdir: "{{ SCRIPT_STAGING_DIR }}"
+        chdir: "{{ SCRIPT_PROD_DIR }}"
 
     - name: Execute {{ SCRIPT_UPDATE_STAGING }} Script on Server
       become: true

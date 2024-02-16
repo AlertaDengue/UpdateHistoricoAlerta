@@ -37,7 +37,7 @@ change-vault-passwd:
 	# Change the password of the vault configuration file
 	source venv/bin/activate && ansible-vault rekey $(vault_config)
 
-coiners-system-update:
+containers-system-update:
 	source $(venv_dir)/bin/activate && \
 	ansible-playbook -i $(hosts_dir) --ask-vault-pass \
 	--extra-vars "@$(vault_config)" \
