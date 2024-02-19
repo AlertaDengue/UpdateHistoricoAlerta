@@ -4,29 +4,77 @@
   gather_facts: true
 
   vars:
-    SCRIPT_UPDATE_TABLES: update_historico_alerta.sh
-    SCRIPT_UPDATE_STAGING:  update_staging.sh
-    SCRIPT_PROD_DIR: /opt/services/alertadengue
-    SCRIPT_STAGING_DIR: /opt/services/staging_AlertaDengue
+    UPDATE_TABLES: update_historico_alerta.sh
+    UPDATE_STAGING: update_staging.sh
+    PROD_PATH_ROOT: /opt/services/alertadengue
+    STAGING_PATH_ROOT: /opt/services/staging_AlertaDengue
+    SCRIPT_DIR: ../ansible/roles/historico-alertas-update/scripts
     LOG_PATH: /var/log/ansible
 
   tasks:
-    - name: Execute {{ SCRIPT_UPDATE_TABLES }} Script on Server
+    - name: Copy update_historico_alerta.sh script to remote host
+      copy:
+        src: "{{ SCRIPT_DIR }}/{{ UPDATE_TABLES }}"
+        dest: "{{ PROD_PATH_ROOT }}/{{ UPDATE_TABLES }}"
+        mode: '0755'
       become: true
       become_user: administrador
-      shell: "nohup ./{{ SCRIPT_UPDATE_TABLES }}"
-      args:
-        chdir: "{{ SCRIPT_STAGING_DIR }}"
+      tags:
+        - copy
+        - update
 
-    - name: Execute {{ SCRIPT_UPDATE_STAGING }} Script on Server
+    - name: Copy update_staging.sh script to remote host
+      copy:
+        src: "{{ SCRIPT_DIR }}/{{ UPDATE_STAGING }}"
+        dest: "{{ STAGING_PATH_ROOT }}/{{ UPDATE_STAGING }}"
+        mode: '0755'
       become: true
       become_user: administrador
-      shell: "nohup ./{{ SCRIPT_UPDATE_STAGING }}"
+      tags:
+        - copy
+        - staging
+
+    - name: Execute update_historico_alerta.sh Script on Server
+      become: true
+      become_user: administrador
+      shell: "nohup ./{{ UPDATE_TABLES }}"
       args:
-        chdir: "{{ SCRIPT_STAGING_DIR }}"
+        chdir: "{{ PROD_PATH_ROOT }}"
+      tags:
+        - execute
+        - update
+
+    - name: Execute update_staging.sh Script on Server
+      become: true
+      become_user: administrador
+      shell: "nohup ./{{ UPDATE_STAGING }}"
+      args:
+        chdir: "{{ STAGING_PATH_ROOT }}"
+      tags:
+        - execute
+        - staging
+
+    - name: Clean up all bash scripts from Remote and destination directories
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ STAGING_PATH_ROOT }}/*.sh"
+        - "{{ PROD_PATH_ROOT }}/*.sh"
+      delegate_to: localhost
 
     - name: Register staging update in the log file
-      shell: echo "{{ lookup('pipe','date') }} ==> Synchronize All Tables Successfully" >> {{ LOG_PATH }}/system_update_tables.log 2>&1
+      shell: echo "{{ lookup('pipe','date') }} ==> Synchronize All Tables Successfully" >> "{{ LOG_PATH }}/system_update_tables.log"
+      become: true
+      become_user: administrador
+      tags:
+        - log
+        - update
 
     - name: Register sent images in the log file
-      shell: echo "{{ lookup('pipe','date') }} ==> Build and Deploy All Containers Successfully" >> {{ LOG_PATH }}/system_update_staging.log 2>&1
+      shell: echo "{{ lookup('pipe','date') }} ==> Build and Deploy All Containers Successfully" >> "{{ LOG_PATH }}/system_update_staging.log"
+      become: true
+      become_user: administrador
+      tags:
+        - log
+        - staging
