@@ -1,0 +1,80 @@
+---
+- name: Update database and deploy container services
+  hosts: cluster
+  gather_facts: true
+
+  vars:
+    UPDATE_TABLES: update_historico_alerta.sh
+    UPDATE_STAGING: update_staging.sh
+    PROD_PATH_ROOT: /opt/services/alertadengue
+    STAGING_PATH_ROOT: /opt/services/staging_AlertaDengue
+    SCRIPT_DIR: ../ansible/roles/historico-alertas-update/scripts
+    LOG_PATH: /var/log/ansible
+
+  tasks:
+    - name: Copy update_historico_alerta.sh script to remote host
+      copy:
+        src: "{{ SCRIPT_DIR }}/{{ UPDATE_TABLES }}"
+        dest: "{{ PROD_PATH_ROOT }}/{{ UPDATE_TABLES }}"
+        mode: '0755'
+      become: true
+      become_user: administrador
+      tags:
+        - copy
+        - update
+
+    - name: Copy update_staging.sh script to remote host
+      copy:
+        src: "{{ SCRIPT_DIR }}/{{ UPDATE_STAGING }}"
+        dest: "{{ STAGING_PATH_ROOT }}/{{ UPDATE_STAGING }}"
+        mode: '0755'
+      become: true
+      become_user: administrador
+      tags:
+        - copy
+        - staging
+
+    - name: Execute update_historico_alerta.sh Script on Server
+      become: true
+      become_user: administrador
+      shell: "nohup ./{{ UPDATE_TABLES }}"
+      args:
+        chdir: "{{ PROD_PATH_ROOT }}"
+      tags:
+        - execute
+        - update
+
+    - name: Execute update_staging.sh Script on Server
+      become: true
+      become_user: administrador
+      shell: "nohup ./{{ UPDATE_STAGING }}"
+      args:
+        chdir: "{{ STAGING_PATH_ROOT }}"
+      tags:
+        - execute
+        - staging
+
+    - name: Clean up all bash scripts from Remote and destination directories
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ STAGING_PATH_ROOT }}/*.sh"
+        - "{{ PROD_PATH_ROOT }}/*.sh"
+      delegate_to: localhost
+
+    - name: Register staging update in the log file
+      shell: echo "{{ lookup('pipe','date') }} ==> Synchronize All Tables Successfully" >> "{{ LOG_PATH }}/system_update_tables.log"
+      become: true
+      become_user: administrador
+      tags:
+        - log
+        - update
+
+    - name: Register sent images in the log file
+      shell: echo "{{ lookup('pipe','date') }} ==> Build and Deploy All Containers Successfully" >> "{{ LOG_PATH }}/system_update_staging.log"
+      become: true
+      become_user: administrador
+      tags:
+        - log
+        - staging

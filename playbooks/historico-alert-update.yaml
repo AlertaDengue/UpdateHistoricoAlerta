@@ -8,11 +8,10 @@
     db_user: "{{ psql_user }}"
     db_name: "{{ psql_db }}"
     db_password: "{{ psql_passwd }}"
-    SRC_DIR: /tmp/sql
-    DEST_DIR: /tmp/sql
+    HOST_SOURCE_DIR: /tmp/sql
+    REMOTE_TARGET_DIR: /tmp/sql
+    SCRIPT_DIR: ../ansible/roles/historico-alertas-update/scripts/sql
     SQL_FNAME: "update_hist_alerta_{{ yearweek }}_{{ disease }}.sql"
-    SCRIPT_NAME: update_historico_alerta.sh
-    SCRIPT_DIR: /opt/services/AlertaDengue
     LOG_PATH: /var/log/ansible
 
   tasks:
@@ -30,19 +29,19 @@
         ansible_port: "{{ desired_port }}"
 
     - file:
-        path: "{{ SRC_DIR }}"
+        path: "{{ HOST_SOURCE_DIR }}"
         state: directory
         mode: 0755
 
-    - command: cp "{{ item }}" {{ SRC_DIR }}/{{ SQL_FNAME }}
+    - command: cp "{{ item }}" {{ HOST_SOURCE_DIR }}/{{ SQL_FNAME }}
       with_fileglob:
-        - ../ansible/roles/hist-alertas-update/scripts/sql/*.sql
+        - "{{ SCRIPT_DIR }}/*.sql"
       delegate_to: localhost
 
     - name: Copy script to server
       copy:
-        src: "{{ SRC_DIR }}/{{ SQL_FNAME }}"
-        dest: "{{ DEST_DIR }}/{{ SQL_FNAME }}"
+        src: "{{ HOST_SOURCE_DIR }}/{{ SQL_FNAME }}"
+        dest: "{{ REMOTE_TARGET_DIR }}/{{ SQL_FNAME }}"
         owner: "{{ cluster_user_name }}"
         group: "{{ cluster_user_name }}"
         mode: "0644"
@@ -53,23 +52,7 @@
       shell: PGPASSWORD={{ psql_passwd }} psql -h {{ psql_host }} \
                   -p {{ psql_port }} \
                   -U {{ psql_user }} \
-                  -d {{ db_name }} -f {{ DEST_DIR }}/{{ SQL_FNAME }}
+                  -d {{ db_name }} -f {{ REMOTE_TARGET_DIR }}/{{ SQL_FNAME }}
 
-    - name: Execute Script on Server
-      become: true
-      become_user: administrador
-      shell: "nohup ./{{ SCRIPT_NAME }}"
-      args:
-        chdir: "{{ SCRIPT_DIR }}"
-
-    - name: Remove script from sql folder
-      file:
-        path: "{{ item }}"
-        state: absent
-      with_fileglob:
-        - ../ansible/roles/hist-alertas-update/scripts/sql/*.sql
-        - /tmp/sql/*.sql
-      delegate_to: localhost
-
-    - name: Register upload in the log file
-      shell: echo "{{ lookup('pipe','date') }} ==> {{ SQL_FNAME }}" >> {{ LOG_PATH }}/system_update_epiweeks.log 2>&1
+    - name: Log the SQL script execution
+      shell: echo "{{ lookup('pipe','date') }} ==> SQL script {{ SQL_FNAME }} executed successfully" >> "{{ LOG_PATH }}/historico_alertas_update.log"

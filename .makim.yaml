@@ -1,0 +1,85 @@
+version: 1.0
+groups:
+  vault:
+    vars:
+      venv_dir: venv
+      hosts_dir: ansible/config/hosts
+      tasks_dir: ansible/roles/maps-upload/tasks
+      roles_dir: ansible/roles
+      vault_config: ansible/config/vault-config.yam
+    targets:
+      create-vault-config:
+        shell: bash
+        help: Create the vault configuration file
+        run: |
+          ansible-vault create "{{ vars.vault_config }}"
+      change-vault-config:
+        shell: bash
+        help: Edit the vault configuration file
+        run: |
+          ansible-vault edit "{{ vars.vault_config }}"
+      change-vault-passwd:
+        shell: bash
+        help: Change the password of the vault configuration file
+        run: |
+          ansible-vault rekey "{{ vars.vault_config }}"
+
+  ansible:
+    vars:
+      venv_dir: venv
+      hosts_dir: ansible/config/hosts
+      tasks_dir: ansible/roles/maps-upload/tasks
+      roles_dir: ansible/roles
+      vault_config: ansible/config/vault-config.yaml
+
+    targets:
+      containers-system-update:
+        shell: bash
+        help: Run ansible scripts for containers system update
+        run: |
+          ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
+            --extra-vars "@{{ vars.vault_config }}" \
+            playbooks/containers-system-update.yaml  --verbose
+
+      update-alertas:
+        shell: bash
+        help: Execute the playbook to update alerts
+        args:
+          disease:
+            help: Specify the disease name (e.g., 'dengue', 'chik' or 'zika' )
+            type: string
+            required: true
+          yearweek:
+            help: Specify the yearweek from epiweek as YYYYWW format
+            type: string
+            required: true
+        run: |
+          ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
+            --extra-vars "@{{ vars.vault_config }}" \
+            -e " yearweek={{ args.yearweek }} disease={{ args.disease }}" \
+            playbooks/historico-alert-prepare-hosts.yaml  --verbose
+
+      sync-maps:
+        shell: bash
+        help: Execute the playbook for incidence map upload
+        run: |
+          ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
+            --extra-vars "@{{ vars.vault_config }}" \
+            playbooks/incidence-map-upload.yaml --verbose
+
+      history:
+        help: View the history
+        vars:
+          alertas_update: historico_alertas_update.log
+          sync_maps: incidence_maps_update.log
+          containers_update: system_update_staging.log
+          system_update_tables: system_update_tables.log
+        args:
+          logfile:
+            help: Chose a specific log name in vars
+            type: string
+            required: false
+        run: |
+          ansible -i "{{ vars.hosts_dir }}" --ask-vault-pass \
+            --extra-vars "@{{ vars.vault_config }}" \
+            -m command -a "cat /var/log/ansible/{{ args.logfile }}" all --verbose

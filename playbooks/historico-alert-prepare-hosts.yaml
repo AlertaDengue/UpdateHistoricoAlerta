@@ -6,7 +6,6 @@
   vars:
     username: "{{ lookup('env', 'USER') }}"
 
-
   tasks:
   - name: Check if output directory exists
     stat:
@@ -22,5 +21,8 @@
       mode: 0775
     when: output_folder.stat.exists == false
 
-- name: Include a play for the tasks
+- name: Include historico-alert-update playbook for the tasks
   ansible.builtin.import_playbook: historico-alert-update.yaml
+
+- name: Include containers-system-update playbook to update and reload all system
+  ansible.builtin.import_playbook: containers-system-update.yaml
