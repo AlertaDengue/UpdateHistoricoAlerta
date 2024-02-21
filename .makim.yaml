@@ -6,7 +6,7 @@ groups:
       hosts_dir: ansible/config/hosts
       tasks_dir: ansible/roles/maps-upload/tasks
       roles_dir: ansible/roles
-      vault_config: ansible/config/vault-config.yam
+      vault_config: ansible/config/vault-config.yaml
     targets:
       create-vault-config:
         shell: bash
