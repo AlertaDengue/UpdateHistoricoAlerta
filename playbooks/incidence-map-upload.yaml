@@ -6,7 +6,7 @@
   vars:
     ROLE_MAPS_DIR: ../ansible/roles/maps-upload
     HOST_SOURCE_DIR: '{{ ROLE_MAPS_DIR }}/images/incidence_maps/'
-    REMOTE_TARGET_DIR: /Storage//Storage/infodengue_data/img/incidence_maps
+    REMOTE_TARGET_DIR: /Storage/infodengue_data/img/incidence_maps
     LOG_PATH: /var/log/ansible
 
   tasks:
