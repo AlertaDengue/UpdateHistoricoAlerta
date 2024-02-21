@@ -2,10 +2,10 @@
 
 # Load environment variables from a .env file
 load_env() {
-    if [[ -f .env ]]; then
-        echo -e "\n >>> Loading environment variables from .env file <<< \n"
-        export $(grep -v '^#' .env | xargs)
-    fi
+  if [[ -f .env ]]; then
+    echo -e "\n >>> Loading environment variables from .env file <<< \n"
+    export $(grep -v '^#' .env | xargs)
+  fi
 }
 
 # Activate the development environment
