@@ -21,7 +21,9 @@ activate_env() {
 refresh_materialized_views() {
     echo -e "\n >>> Starting update of MATERIALIZED VIEWS... <<< \n"
     local views=("uf_total_zika_view" "uf_total_chik_view" "uf_total_view" "hist_uf_dengue_materialized_view" \
-        "hist_uf_chik_materialized_view" "hist_uf_zika_materialized_view" "\"Municipio\".historico_casos")
+        "hist_uf_chik_materialized_view" "hist_uf_zika_materialized_view" "city_count_by_uf_dengue_materialized_view" \
+        "city_count_by_uf_chikungunya_materialized_view" "city_count_by_uf_zika_materialized_view" \
+        "epiyear_summary_materialized_view" "\"Municipio\".historico_casos")
     for view in "${views[@]}"; do
         echo "Refreshing $view..."
         PGPASSWORD="$PSQL_PASSWORD" psql -h "$PSQL_HOST" -d "$PSQL_DB" -U "$PSQL_USER" -p "$PSQL_PORT" \
