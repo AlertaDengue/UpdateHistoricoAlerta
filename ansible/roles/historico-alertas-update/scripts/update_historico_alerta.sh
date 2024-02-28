@@ -34,10 +34,10 @@ refresh_materialized_views() {
     done
 }
 
-# Clean development environment using makim
+# Clean django cache using makim
 clean_develop_env() {
-    echo -e "\n >>> Cleaning development environment... <<< \n"
-    makim develop.clean || {
+    echo -e "\n >>> Cleaning django cache... <<< \n"
+    makim develop.clear_cache || {
         echo "Failed to clean development environment" >&2
         exit 1
     }
