@@ -43,3 +43,5 @@ vault-config.yaml
 
 # All
 *bkp/*
+**incidence_maps**
+**scripts/sql/**

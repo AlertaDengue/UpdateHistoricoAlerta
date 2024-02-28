@@ -6,7 +6,7 @@
   vars:
     ROLE_MAPS_DIR: ../ansible/roles/maps-upload
     HOST_SOURCE_DIR: '{{ ROLE_MAPS_DIR }}/images/incidence_maps/'
-    REMOTE_TARGET_DIR: /Storage//Storage/infodengue_data/img/incidence_maps
+    REMOTE_TARGET_DIR: /Storage/infodengue_data/img/incidence_maps
     LOG_PATH: /var/log/ansible
 
   tasks:
@@ -16,14 +16,6 @@
         dest: "{{ REMOTE_TARGET_DIR }}"
       delegate_to: localhost
 
-    - name: Clean up bash scripts from remote and destination directories
-      file:
-        path: "{{ item }}"
-        state: absent
-      with_items:
-        - "{{ HOST_SOURCE_DIR }}/*.sql"
-      delegate_to: localhost
- 
     - name: Register sent images in the log file
       shell: echo "{{ lookup('pipe','date') }} ==> Synchronize Map Images Successfully" >> {{ LOG_PATH }}/incidence_maps_update.log 2>&1
 

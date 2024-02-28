@@ -2,10 +2,10 @@
 
 # Load environment variables from a .env file
 load_env() {
-    if [[ -f .env ]]; then
-        echo -e "\n >>> Loading environment variables from .env file <<< \n"
-        export $(grep -v '^#' .env | xargs)
-    fi
+  if [[ -f .env ]]; then
+    echo -e "\n >>> Loading environment variables from .env file <<< \n"
+    export $(grep -v '^#' .env | xargs)
+  fi
 }
 
 # Activate the development environment
@@ -21,7 +21,9 @@ activate_env() {
 refresh_materialized_views() {
     echo -e "\n >>> Starting update of MATERIALIZED VIEWS... <<< \n"
     local views=("uf_total_zika_view" "uf_total_chik_view" "uf_total_view" "hist_uf_dengue_materialized_view" \
-        "hist_uf_chik_materialized_view" "hist_uf_zika_materialized_view" "\"Municipio\".historico_casos")
+        "hist_uf_chik_materialized_view" "hist_uf_zika_materialized_view" "city_count_by_uf_dengue_materialized_view" \
+        "city_count_by_uf_chikungunya_materialized_view" "city_count_by_uf_zika_materialized_view" \
+        "epiyear_summary_materialized_view" "\"Municipio\".historico_casos")
     for view in "${views[@]}"; do
         echo "Refreshing $view..."
         PGPASSWORD="$PSQL_PASSWORD" psql -h "$PSQL_HOST" -d "$PSQL_DB" -U "$PSQL_USER" -p "$PSQL_PORT" \
@@ -32,10 +34,10 @@ refresh_materialized_views() {
     done
 }
 
-# Clean development environment using makim
+# Clean django cache using makim
 clean_develop_env() {
-    echo -e "\n >>> Cleaning development environment... <<< \n"
-    makim develop.clean || {
+    echo -e "\n >>> Cleaning django cache... <<< \n"
+    makim develop.clear_cache || {
         echo "Failed to clean development environment" >&2
         exit 1
     }

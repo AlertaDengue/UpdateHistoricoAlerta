@@ -11,7 +11,7 @@
     - [incidence-map-upload.yaml](#incidence-map-uploadyaml)
     - [incidence-map-upload.yaml](#containers-system-updateyaml)
 - [Installation](#installation)
-- [Usage - (Makefile)](#usage)
+- [Usage - (Makim)](#usage)
 
 
 ## Playbooks
