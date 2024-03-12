@@ -1,0 +1,33 @@
+---
+- name: Upload SINAN DBF into Production
+  hosts: cluster
+  gather_facts: true
+
+  vars:
+    HOST_FILE_NAME: "{{ file }}"
+    YEAR: "{{ year }}"
+    CID: "{{ cid }}"
+    DBF_HOST_DIR: ../ansible/roles/sinan/dbf
+    HOST_FILE_PATH: "{{ DBF_HOST_DIR }}/{{ HOST_FILE_NAME }}"
+    REMOTE_TARGET_DIR: /Storage/infodengue_data/sftp2/alertadengue/uploaded
+    LOG_PATH: /var/log/ansible
+
+  tasks:
+    - name: Checking if ssh is running on port {{ cluster_node_port }}
+      delegate_to: localhost
+      wait_for:
+        port: "{{ cluster_node_port }}"
+        host: "{{ ansible_host }}"
+        timeout: 10
+      ignore_errors: true
+      register: desired_port_check
+
+    - name: Copying DBF to Production
+      copy:
+        src: "{{ HOST_FILE_PATH }}"
+        dest: "{{ REMOTE_TARGET_DIR }}/{{ HOST_FILE_NAME }}"
+        owner: "{{ cluster_user_name }}"
+        group: "{{ cluster_user_name }}"
+
+    - name: Registering sent DBF on log file
+      shell: echo "{{ lookup('pipe','date') }} ==> DBF {{ HOST_FILE_NAME }} for {{ CID }} and {{ YEAR }} uploaded successfully" >> {{ LOG_PATH }}/upload_sinan_dbf.log 2>&1

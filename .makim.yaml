@@ -67,6 +67,29 @@ groups:
             --extra-vars "@{{ vars.vault_config }}" \
             playbooks/incidence-map-upload.yaml --verbose
 
+      upload-sinan-dbf:
+        shell: bash
+        help: Execute the playbook for uploading SINAN DBFs
+        args:
+          file:
+            help: Specify the file name inside ../ansible/sinan/dbf/
+            type: string
+            required: true
+          year:
+            help: Specify the year (format YYYY)
+            type: int
+            required: true
+          cid:
+            help: Specify the CID (default 'A90')
+            type: string
+            required: false
+            default: "A90"
+        run: |
+          ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
+            --extra-vars "@{{ vars.vault_config }}" \
+            -e " file={{ args.file }} year={{ args.year }} cid={{ args.cid }}" \
+            playbooks/upload-sinan-dbf.yaml --verbose
+
       history:
         help: View the history
         vars:
@@ -74,6 +97,7 @@ groups:
           sync_maps: incidence_maps_update.log
           containers_update: system_update_staging.log
           system_update_tables: system_update_tables.log
+          sinan_upload_dbf: sinan_upload_dbf.log
         args:
           logfile:
             help: Chose a specific log name in vars
