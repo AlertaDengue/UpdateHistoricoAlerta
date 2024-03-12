@@ -71,23 +71,39 @@ groups:
         shell: bash
         help: Execute the playbook for uploading SINAN DBFs
         args:
-          file:
-            help: Specify the file name inside ../ansible/sinan/dbf/
+          file-path:
+            help: Absolute file path to be exported
             type: string
             required: true
           year:
-            help: Specify the year (format YYYY)
+            help: Notification year (format YYYY)
             type: int
             required: true
-          cid:
-            help: Specify the CID (default 'A90')
+          codarea:
+            help: Specify area code (default 'BR')
             type: string
             required: false
-            default: "A90"
+            default: "BR"
+          disease:
+            help: Specify the disease (default 'DEN')
+            type: string
+            required: false
+            default: "DEN"
         run: |
+          export FILE="{{args.file_path}}"
+          export FILE="${FILE%/}"
+          export FILE_SUFFIX="${FILE##*.}"
+
+          export EXPORT_DATE=$(date +"%m-%d-%Y")
+
           ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
             --extra-vars "@{{ vars.vault_config }}" \
-            -e " file={{ args.file }} year={{ args.year }} cid={{ args.cid }}" \
+            -e " file_path={{ args.file_path }} \
+                 code_area={{ args.codarea|upper }} \
+                 disease={{ args.disease|upper }} \
+                 notif_year={{ args.year }} \
+                 export_date=$EXPORT_DATE \
+                 file_type=$FILE_SUFFIX" \
             playbooks/upload-sinan-dbf.yaml --verbose
 
       history:

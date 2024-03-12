@@ -1,15 +1,19 @@
 ---
-- name: Upload SINAN DBF into Production
+- name: Upload SINAN file into Production
   hosts: cluster
   gather_facts: true
 
   vars:
-    DBF_NAME: "{{ file }}"
-    YEAR: "{{ year }}"
-    CID: "{{ cid }}"
-    HOST_DIR: ../ansible/roles/sinan/dbf
-    HOST_DBF_PATH: "{{ HOST_DIR }}/{{ DBF_NAME }}.dbf"
-    REMOTE_TARGET_DIR: /Storage/infodengue_data/sftp2/alertadengue/uploaded
+    HOST_FILE_PATH: "{{ file_path }}"
+
+    CODEAREA: "{{ code_area }}"
+    DISEASE: "{{ disease }}"
+    NOTIF_YEAR: "{{ notif_year }}"
+    EXPORT_DATE: "{{ export_date }}"
+    FILE_TYPE: "{{ file_type }}"
+    FILE_NAME: "{{CODEAREA}}-{{DISEASE}}-{{NOTIF_YEAR}}-{{EXPORT_DATE}}.{{FILE_TYPE}}"
+
+    REMOTE_FILE_PATH: /Storage/infodengue_data/sftp2/alertadengue/uploaded/{{FILE_NAME}}
     LOG_PATH: /var/log/ansible
 
   tasks:
@@ -22,12 +26,12 @@
       ignore_errors: true
       register: desired_port_check
 
-    - name: Copying DBF to Production
+    - name: Copying file to Production
       copy:
-        src: "{{ HOST_DBF_PATH }}"
-        dest: "{{ REMOTE_TARGET_DIR }}/{{ DBF_NAME }}.dbf"
+        src: "{{ HOST_FILE_PATH }}"
+        dest: "{{ REMOTE_FILE_PATH }}"
         owner: "{{ cluster_user_name }}"
         group: "{{ cluster_user_name }}"
 
     - name: Registering sent DBF on log file
-      shell: echo "{{ lookup('pipe','date') }} ==> DBF {{ DBF_NAME }} for cid {{ CID }} and year {{ YEAR }} uploaded successfully" >> {{ LOG_PATH }}/upload_sinan_dbf.log 2>&1
+      shell: echo "{{ lookup('pipe','date') }} ==> {{FILE_NAME}} uploaded successfully" >> {{ LOG_PATH }}/upload_sinan_dbf.log 2>&1
