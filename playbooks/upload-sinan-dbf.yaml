@@ -4,11 +4,11 @@
   gather_facts: true
 
   vars:
-    HOST_FILE_NAME: "{{ file }}"
+    DBF_NAME: "{{ file }}"
     YEAR: "{{ year }}"
     CID: "{{ cid }}"
-    DBF_HOST_DIR: ../ansible/roles/sinan/dbf
-    HOST_FILE_PATH: "{{ DBF_HOST_DIR }}/{{ HOST_FILE_NAME }}"
+    HOST_DIR: ../ansible/roles/sinan/dbf
+    HOST_DBF_PATH: "{{ HOST_DIR }}/{{ DBF_NAME }}.dbf"
     REMOTE_TARGET_DIR: /Storage/infodengue_data/sftp2/alertadengue/uploaded
     LOG_PATH: /var/log/ansible
 
@@ -24,10 +24,10 @@
 
     - name: Copying DBF to Production
       copy:
-        src: "{{ HOST_FILE_PATH }}"
-        dest: "{{ REMOTE_TARGET_DIR }}/{{ HOST_FILE_NAME }}"
+        src: "{{ HOST_DBF_PATH }}"
+        dest: "{{ REMOTE_TARGET_DIR }}/{{ DBF_NAME }}.dbf"
         owner: "{{ cluster_user_name }}"
         group: "{{ cluster_user_name }}"
 
     - name: Registering sent DBF on log file
-      shell: echo "{{ lookup('pipe','date') }} ==> DBF {{ HOST_FILE_NAME }} for {{ CID }} and {{ YEAR }} uploaded successfully" >> {{ LOG_PATH }}/upload_sinan_dbf.log 2>&1
+      shell: echo "{{ lookup('pipe','date') }} ==> DBF {{ DBF_NAME }} for cid {{ CID }} and year {{ YEAR }} uploaded successfully" >> {{ LOG_PATH }}/upload_sinan_dbf.log 2>&1
