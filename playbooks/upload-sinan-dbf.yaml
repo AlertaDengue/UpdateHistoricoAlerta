@@ -1,0 +1,57 @@
+---
+- name: Upload SINAN file into Production
+  hosts: cluster
+  gather_facts: true
+
+  vars:
+    HOST_FILE_PATH: "{{ file_path }}"
+
+    CODEAREA: "{{ code_area }}"
+    DISEASE: "{{ disease }}"
+    NOTIF_YEAR: "{{ notif_year }}"
+    EXPORT_DATE: "{{ export_date }}"
+    FILE_TYPE: "{{ file_type }}"
+    CID: "{{ cid }}"
+    FILE_NAME: "{{CODEAREA}}-{{DISEASE}}-{{NOTIF_YEAR}}-{{EXPORT_DATE}}.{{FILE_TYPE}}"
+
+    REMOTE_FILE_PATH: /Storage/infodengue_data/sftp2/alertadengue/uploaded/{{FILE_NAME}}
+    # REMOTE_FILE_PATH: /Storage/staging_data/sftp2/alertadengue/uploaded/{{FILE_NAME}}
+    LOG_PATH: /var/log/ansible
+    SCRIPT_DIR: ../ansible/roles/sinan/scripts
+    SCRIPT: upload_sinan.sh
+
+  tasks:
+    - name: Checking if ssh is running on port {{ cluster_node_port }}
+      delegate_to: localhost
+      wait_for:
+        port: "{{ cluster_node_port }}"
+        host: "{{ ansible_host }}"
+        timeout: 10
+      ignore_errors: true
+      register: desired_port_check
+
+    - name: Copying {{ SCRIPT }} to remote server
+      copy:
+        src: "{{ SCRIPT_DIR }}/{{ SCRIPT }}"
+        dest: "/tmp/{{ SCRIPT }}"
+        mode: '0755'
+      become: true
+      become_user: administrador
+
+    - name: Copying {{ FILE_NAME }} to remote server
+      copy:
+        src: "{{ HOST_FILE_PATH }}"
+        dest: "{{ REMOTE_FILE_PATH }}"
+        owner: "{{ cluster_user_name }}"
+        group: "{{ cluster_user_name }}"
+
+    - name: Uploading {{ FILE_NAME }} to Database
+      become: true
+      become_user: administrador
+      shell: "nohup /tmp/{{ SCRIPT }} /MEDIA_ROOT/{{ FILE_NAME }} {{ NOTIF_YEAR }} {{ CID }}"
+
+    - name: Removing {{ SCRIPT }}
+      shell: "rm /tmp/{{ SCRIPT }}"
+
+    - name: Registering sent DBF on log file
+      shell: echo "{{ lookup('pipe','date') }} ==> {{FILE_NAME}} uploaded successfully" >> {{ LOG_PATH }}/upload_sinan_dbf.log 2>&1

@@ -67,6 +67,49 @@ groups:
             --extra-vars "@{{ vars.vault_config }}" \
             playbooks/incidence-map-upload.yaml --verbose
 
+      upload-sinan-dbf:
+        shell: bash
+        help: Execute the playbook for uploading SINAN DBFs
+        args:
+          file-path:
+            help: Absolute file path to be exported
+            type: string
+            required: true
+          year:
+            help: Notification year (format YYYY)
+            type: int
+            required: true
+          codarea:
+            help: Specify area code (default 'BR')
+            type: string
+            required: false
+            default: "BR"
+          disease:
+            help: Specify the disease (default 'DEN')
+            type: string
+            required: false
+            default: "DEN"
+        run: |
+          FILE="{{args.file_path}}"
+          FILE="${FILE%/}"
+          FILE_SUFFIX="${FILE##*.}"
+
+          EXPORT_DATE=$(date +"%m-%d-%Y")
+          DISEASE="{{ args.disease|upper }}"
+
+          case $DISEASE in CHIK) CID="A92.0";; ZIKA) CID="A928";; *) CID="A90";; esac
+
+          ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
+            --extra-vars "@{{ vars.vault_config }}" \
+            -e " file_path={{ args.file_path }} \
+                 code_area={{ args.codarea|upper }} \
+                 disease={{ args.disease|upper }} \
+                 notif_year={{ args.year }} \
+                 export_date=$EXPORT_DATE \
+                 file_type=$FILE_SUFFIX \
+                 cid=$CID" \
+            playbooks/upload-sinan-dbf.yaml --verbose
+
       history:
         help: View the history
         vars:
@@ -74,6 +117,7 @@ groups:
           sync_maps: incidence_maps_update.log
           containers_update: system_update_staging.log
           system_update_tables: system_update_tables.log
+          sinan_upload_dbf: sinan_upload_dbf.log
         args:
           logfile:
             help: Chose a specific log name in vars
