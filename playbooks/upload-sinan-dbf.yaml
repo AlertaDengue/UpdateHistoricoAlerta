@@ -48,7 +48,7 @@
     - name: Executing {{ SCRIPT }} on remote server
       become: true
       become_user: administrador
-      shell: "nohup /tmp/{{ SCRIPT }} /MEDIA_ROOT/{{ FILE_NAME }} {{ NOTIF_YEAR }} {{ CID }}"
+      shell: "nohup /tmp/{{ SCRIPT }} /Storage/infodengue_data/sftp2/alertadengue/uploaded/{{ FILE_NAME }} {{ NOTIF_YEAR }} {{ CID }}"
 
     - name: Registering sent DBF on log file
       shell: echo "{{ lookup('pipe','date') }} ==> {{FILE_NAME}} uploaded successfully" >> {{ LOG_PATH }}/upload_sinan_dbf.log 2>&1
