@@ -22,10 +22,12 @@ run_upload_sinan() {
     echo -e "\n >>> Executing load_sinan command on AlertaDengue <<< \n"
     cd /opt/services/AlertaDengue
     # cd /opt/services/staging_AlertaDengue
-    sugar exec --service web --cmd python manage.py load_sinan $FILE $YEAR --default-cid $CID || {
-        echo "Failed to execute load_sinan" >&2
+    output=$(sugar exec --service web --cmd python manage.py load_sinan $FILE $YEAR --default-cid $CID 2>&1)
+    if [[ $output == *"Errno 2"* || $output == *"Traceback"* ]]; then
+        echo "Something went wrong: $output"
         exit 1
-    }
+    fi
+    echo "$output"
 }
 
 main() {
