@@ -97,7 +97,7 @@ groups:
           EXPORT_DATE=$(date +"%m-%d-%Y")
           DISEASE="{{ args.disease|upper }}"
 
-          case $DISEASE in CHIK) CID="A92.0";; ZIKA) CID="A92.5";; *) CID="A90";; esac
+          case $DISEASE in CHIK) CID="A92.0";; ZIKA) CID="A928";; *) CID="A90";; esac
 
           ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
             --extra-vars "@{{ vars.vault_config }}" \

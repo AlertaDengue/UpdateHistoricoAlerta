@@ -11,8 +11,8 @@ CID=$3
 
 activate_env() {
     echo -e "\n >>> Activating the alertadengue environment <<< \n"
-    source /opt/environments/mambaforge/bin/activate alertadengue || {
-    # source /opt/environments/mambaforge/bin/activate dev-alertadengue || {
+    # source /opt/environments/mambaforge/bin/activate alertadengue || {
+    source /opt/environments/mambaforge/bin/activate dev-alertadengue || {
         echo "Failed to activate the alertadengue environment" >&2
         exit 1
     }
