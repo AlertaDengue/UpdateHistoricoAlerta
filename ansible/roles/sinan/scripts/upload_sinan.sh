@@ -19,8 +19,8 @@ activate_env() {
 
 run_upload_sinan() {
     echo -e "\n >>> Executing load_sinan command on AlertaDengue <<< \n"
-    cd /opt/services/AlertaDengue
-    # cd /opt/services/staging_AlertaDengue
+    # cd /opt/services/AlertaDengue
+    cd /opt/services/staging_AlertaDengue
     output=$(sugar exec --service worker --cmd python manage.py load_sinan $FILE $YEAR --default-cid $CID 2>&1)
     if [[ $output == *"Errno 2"* || $output == *"Traceback"* ]]; then
         echo "Something went wrong: $output"

@@ -7,22 +7,22 @@ groups:
       tasks_dir: ansible/roles/maps-upload/tasks
       roles_dir: ansible/roles
       vault_config: ansible/config/vault-config.yaml
-    targets:
+    tasks:
       create-vault-config:
         shell: bash
         help: Create the vault configuration file
         run: |
-          ansible-vault create "{{ vars.vault_config }}"
+          ansible-vault create "${{ vars.vault_config }}"
       change-vault-config:
         shell: bash
         help: Edit the vault configuration file
         run: |
-          ansible-vault edit "{{ vars.vault_config }}"
+          ansible-vault edit "${{ vars.vault_config }}"
       change-vault-passwd:
         shell: bash
         help: Change the password of the vault configuration file
         run: |
-          ansible-vault rekey "{{ vars.vault_config }}"
+          ansible-vault rekey "${{ vars.vault_config }}"
 
   ansible:
     vars:
@@ -32,13 +32,13 @@ groups:
       roles_dir: ansible/roles
       vault_config: ansible/config/vault-config.yaml
 
-    targets:
+    tasks:
       containers-system-update:
         shell: bash
         help: Run ansible scripts for containers system update
         run: |
-          ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
-            --extra-vars "@{{ vars.vault_config }}" \
+          ansible-playbook -i "${{ vars.hosts_dir }}" --ask-vault-pass \
+            --extra-vars "${{ vars.vault_config }}" \
             playbooks/containers-system-update.yaml  --verbose
 
       update-alertas:
@@ -54,17 +54,17 @@ groups:
             type: string
             required: true
         run: |
-          ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
-            --extra-vars "@{{ vars.vault_config }}" \
-            -e " yearweek={{ args.yearweek }} disease={{ args.disease }}" \
+          ansible-playbook -i "${{ vars.hosts_dir }}" --ask-vault-pass \
+            --extra-vars "${{ vars.vault_config }}" \
+            -e " yearweek=${{ args.yearweek }} disease=${{ args.disease }}" \
             playbooks/historico-alert-prepare-hosts.yaml  --verbose
 
       sync-maps:
         shell: bash
         help: Execute the playbook for incidence map upload
         run: |
-          ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
-            --extra-vars "@{{ vars.vault_config }}" \
+          ansible-playbook -i "${{ vars.hosts_dir }}" --ask-vault-pass \
+            --extra-vars "${{ vars.vault_config }}" \
             playbooks/incidence-map-upload.yaml --verbose
 
       upload-sinan-dbf:
@@ -90,21 +90,21 @@ groups:
             required: false
             default: "DEN"
         run: |
-          FILE="{{args.file_path}}"
+          FILE="${{args.file_path}}"
           FILE="${FILE%/}"
           FILE_SUFFIX="${FILE##*.}"
 
           EXPORT_DATE=$(date +"%m-%d-%Y")
-          DISEASE="{{ args.disease|upper }}"
+          DISEASE="${{ args.disease|upper }}"
 
           case $DISEASE in CHIK) CID="A92.0";; ZIKA) CID="A928";; *) CID="A90";; esac
 
-          ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
-            --extra-vars "@{{ vars.vault_config }}" \
-            -e " file_path={{ args.file_path }} \
-                 code_area={{ args.codarea|upper }} \
-                 disease={{ args.disease|upper }} \
-                 notif_year={{ args.year }} \
+          ansible-playbook -i "${{ vars.hosts_dir }}" --ask-vault-pass \
+            --extra-vars "${{ vars.vault_config }}" \
+            -e " file_path=${{ args.file_path }} \
+                 code_area=${{ args.codarea|upper }} \
+                 disease=${{ args.disease|upper }} \
+                 notif_year=${{ args.year }} \
                  export_date=$EXPORT_DATE \
                  file_type=$FILE_SUFFIX \
                  cid=$CID" \
@@ -124,6 +124,6 @@ groups:
             type: string
             required: false
         run: |
-          ansible -i "{{ vars.hosts_dir }}" --ask-vault-pass \
-            --extra-vars "@{{ vars.vault_config }}" \
-            -m command -a "cat /var/log/ansible/{{ args.logfile }}" all --verbose
+          ansible -i "${{ vars.hosts_dir }}" --ask-vault-pass \
+            --extra-vars "${{ vars.vault_config }}" \
+            -m command -a "cat /var/log/ansible/${{ args.logfile }}" all --verbose

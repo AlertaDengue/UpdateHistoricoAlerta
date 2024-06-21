@@ -4,6 +4,4 @@ channels:
   - conda-forge
 dependencies:
   - pip
-  - makim
-  - ansible
-  - make
+  - poetry
