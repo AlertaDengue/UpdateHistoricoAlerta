@@ -41,7 +41,11 @@ ENV/
 env.bak/
 vault-config.yaml
 
+# IDE
+.vscode/
+
 # All
 *bkp/*
 **incidence_maps**
 **scripts/sql/**
+ansible/roles/maps-upload/images/incidence_maps/**
