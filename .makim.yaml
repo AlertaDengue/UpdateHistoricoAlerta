@@ -1,74 +1,67 @@
-version: 1.0
 groups:
   vault:
-    vars:
-      venv_dir: venv
-      hosts_dir: ansible/config/hosts
-      tasks_dir: ansible/roles/maps-upload/tasks
-      roles_dir: ansible/roles
-      vault_config: ansible/config/vault-config.yaml
-    targets:
+    env:
+      VENV_DIR: venv
+      HOSTS_DIR: ansible/config/hosts
+      TASKS_DIR: ansible/roles/maps-upload/tasks
+      ROLES_DIR: ansible/roles
+      VAULT_CONFIG: ansible/config/vault-config.yaml
+    tasks:
       create-vault-config:
-        shell: bash
         help: Create the vault configuration file
         run: |
-          ansible-vault create "{{ vars.vault_config }}"
+          ansible-vault create "${{ env.VAULT_CONFIG }}"
+
       change-vault-config:
-        shell: bash
         help: Edit the vault configuration file
         run: |
-          ansible-vault edit "{{ vars.vault_config }}"
+          ansible-vault edit "${{ env.VAULT_CONFIG }}"
+
       change-vault-passwd:
-        shell: bash
         help: Change the password of the vault configuration file
         run: |
-          ansible-vault rekey "{{ vars.vault_config }}"
+          ansible-vault rekey "${{ env.VAULT_CONFIG }}"
 
   ansible:
-    vars:
-      venv_dir: venv
-      hosts_dir: ansible/config/hosts
-      tasks_dir: ansible/roles/maps-upload/tasks
-      roles_dir: ansible/roles
-      vault_config: ansible/config/vault-config.yaml
-
-    targets:
+    env:
+      VENV_DIR: venv
+      HOSTS_DIR: ansible/config/hosts
+      TASKS_DIR: ansible/roles/maps-upload/tasks
+      ROLES_DIR: ansible/roles
+      VAULT_CONFIG: ansible/config/vault-config.yaml
+    tasks:
       containers-system-update:
-        shell: bash
         help: Run ansible scripts for containers system update
         run: |
-          ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
-            --extra-vars "@{{ vars.vault_config }}" \
-            playbooks/containers-system-update.yaml  --verbose
+          ansible-playbook -i "${{ env.HOSTS_DIR }}" --ask-vault-pass \
+            --extra-vars "@${{ env.VAULT_CONFIG }}" \
+            playbooks/containers-system-update.yaml --verbose
 
       update-alertas:
-        shell: bash
         help: Execute the playbook to update alerts
         args:
           disease:
-            help: Specify the disease name (e.g., 'dengue', 'chik' or 'zika' )
+            help: Specify the disease name (e.g., 'dengue', 'chik', 'zika')
             type: string
             required: true
           yearweek:
-            help: Specify the yearweek from epiweek as YYYYWW format
+            help: Specify the yearweek from epiweek as YYYYWW (e.g., 202545)
             type: string
             required: true
         run: |
-          ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
-            --extra-vars "@{{ vars.vault_config }}" \
-            -e " yearweek={{ args.yearweek }} disease={{ args.disease }}" \
-            playbooks/historico-alert-prepare-hosts.yaml  --verbose
+          ansible-playbook -i "${{ env.HOSTS_DIR }}" --ask-vault-pass \
+            --extra-vars "@${{ env.VAULT_CONFIG }}" \
+            -e "yearweek=${{ args.yearweek }} disease=${{ args.disease }}" \
+            playbooks/historico-alert-prepare-hosts.yaml --verbose
 
       sync-maps:
-        shell: bash
         help: Execute the playbook for incidence map upload
         run: |
-          ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
-            --extra-vars "@{{ vars.vault_config }}" \
+          ansible-playbook -i "${{ env.HOSTS_DIR }}" --ask-vault-pass \
+            --extra-vars "@${{ env.VAULT_CONFIG }}" \
             playbooks/incidence-map-upload.yaml --verbose
 
       upload-sinan-dbf:
-        shell: bash
         help: Execute the playbook for uploading SINAN DBFs
         args:
           file-path:
@@ -77,7 +70,7 @@ groups:
             required: true
           year:
             help: Notification year (format YYYY)
-            type: int
+            type: string     # Makim args support string|bool; avoid 'int'
             required: true
           codarea:
             help: Specify area code (default 'BR')
@@ -90,40 +83,41 @@ groups:
             required: false
             default: "DEN"
         run: |
-          FILE="{{args.file_path}}"
-          FILE="${FILE%/}"
-          FILE_SUFFIX="${FILE##*.}"
+          bash -lc '
+            FILE="${{ args.file_path }}"
+            FILE="${FILE%/}"
+            FILE_SUFFIX="${FILE##*.}"
 
-          EXPORT_DATE=$(date +"%m-%d-%Y")
-          DISEASE="{{ args.disease|upper }}"
+            EXPORT_DATE=$(date +"%m-%d-%Y")
+            DISEASE_UPPER=$(echo "${{ args.disease }}" | tr "[:lower:]" "[:upper:]")
+            CODE_AREA_UPPER=$(echo "${{ args.codarea }}" | tr "[:lower:]" "[:upper:]")
 
-          case $DISEASE in CHIK) CID="A92.0";; ZIKA) CID="A928";; *) CID="A90";; esac
+            case "$DISEASE_UPPER" in
+              CHIK) CID="A92.0" ;;
+              ZIKA) CID="A928" ;;
+              *)    CID="A90" ;;
+            esac
 
-          ansible-playbook -i "{{ vars.hosts_dir }}" --ask-vault-pass \
-            --extra-vars "@{{ vars.vault_config }}" \
-            -e " file_path={{ args.file_path }} \
-                 code_area={{ args.codarea|upper }} \
-                 disease={{ args.disease|upper }} \
-                 notif_year={{ args.year }} \
-                 export_date=$EXPORT_DATE \
-                 file_type=$FILE_SUFFIX \
-                 cid=$CID" \
-            playbooks/upload-sinan-dbf.yaml --verbose
+            ansible-playbook -i "${{ env.HOSTS_DIR }}" --ask-vault-pass \
+              --extra-vars "@${{ env.VAULT_CONFIG }}" \
+              -e "file_path=${{ args.file_path }} \
+                  code_area=${CODE_AREA_UPPER} \
+                  disease=${DISEASE_UPPER} \
+                  notif_year=${{ args.year }} \
+                  export_date=${EXPORT_DATE} \
+                  file_type=${FILE_SUFFIX} \
+                  cid=${CID}" \
+              playbooks/upload-sinan-dbf.yaml --verbose
+          '
 
       history:
-        help: View the history
-        vars:
-          alertas_update: historico_alertas_update.log
-          sync_maps: incidence_maps_update.log
-          containers_update: system_update_staging.log
-          system_update_tables: system_update_tables.log
-          sinan_upload_dbf: sinan_upload_dbf.log
+        help: View a specific remote log file under /var/log/ansible/
         args:
           logfile:
-            help: Chose a specific log name in vars
+            help: Log file name (e.g., system_update_staging.log)
             type: string
-            required: false
+            required: true
         run: |
-          ansible -i "{{ vars.hosts_dir }}" --ask-vault-pass \
-            --extra-vars "@{{ vars.vault_config }}" \
-            -m command -a "cat /var/log/ansible/{{ args.logfile }}" all --verbose
+          ansible -i "${{ env.HOSTS_DIR }}" --ask-vault-pass \
+            --extra-vars "@${{ env.VAULT_CONFIG }}" \
+            -m command -a "cat /var/log/ansible/${{ args.logfile }}" all --verbose
