@@ -26,8 +26,9 @@ activate_env() {
   local env_name="${ENV_NAME:-alertadengue}"
   require_cmd conda || true
   # shellcheck disable=SC1090
-  source "$activate_path" "$env_name" || {
-    echo "Failed to activate '$env_name' at $activate_path" >&2; exit 1;
+  conda activate alertadengue || {
+    echo "Failed to activate Conda environment '$env_name'" >&2
+    exit 1
   }
 }
 
@@ -57,7 +58,8 @@ refresh_materialized_views() {
   for view in "${views[@]}"; do
     echo "Refreshing ${view}..."
     PGPASSWORD="$PSQL_PASSWORD" psql \
-      -h "$PSQL_HOST" -p "$PSQL_PORT" -U "$PSQL_USER" -d "$PSQL_DB" \
+      -h "$PSQL_HOST" -p "$PSQL_PORT" \
+      -U "$PSQL_USER" -d "$PSQL_DB" \
       -c "REFRESH MATERIALIZED VIEW ${view};"
   done
 }
@@ -69,29 +71,34 @@ clean_develop_env() {
 }
 
 flush_memcached() {
-  echo -e "\n >>> Flushing memcached <<< \n"
-  local host="${MEMCACHED_HOST:-65.21.204.98}"
-  local port="${MEMCACHED_PORT:-11211}"
-  require_cmd nc
-  # OpenBSD/GNU nc compatibility: use -w for timeout
-  printf "flush_all\r\nquit\r\n" | nc -w 2 "$host" "$port"
+  echo -e "\n >>> Flushing memcached (via containers-sugar) <<< \n"
+
+  require_cmd sugar
+
+  local group="${ENV:-prod}"
+  local service="${MEMCACHED_SERVICE:-memcached}"
+
+  local CMD
+  CMD="sh -lc 'printf \"flush_all\r\nquit\r\n\" | nc -w 2 127.0.0.1 11211'"
+
+  sugar compose exec \
+    --group "$group" \
+    --service "$service" \
+    --cmd "${CMD}"
 }
 
 manage_web_containers() {
   echo -e "\n >>> Managing web containers via containers-sugar <<< \n"
   require_cmd sugar
 
-  # Build images
   sugar compose build \
     --group "${ENV:-dev}" \
     --services web,worker
 
-  # Stop & remove stack (clean)
   sugar compose down \
     --group "${ENV:-dev}" \
     --options "--remove-orphans"
 
-  # Start with extended compose (extra overrides)
   sugar compose-ext up \
     --group "${ENV:-dev}" \
     --services web,worker \
@@ -112,7 +119,8 @@ update_nginx() {
   elif command -v docker-compose >/dev/null 2>&1; then
     dc="docker-compose"
   else
-    echo "docker compose/docker-compose not found" >&2; exit 1
+    echo "docker compose/docker-compose not found" >&2
+    exit 1
   fi
 
   $dc --env-file .env -p "$project_name" -f "$compose_file" build --no-cache
@@ -122,7 +130,7 @@ update_nginx() {
 main() {
   echo -e "\n === AlertaDengue update started === \n"
   load_env
-  activate_env
+  # activate_env
   refresh_materialized_views
   clean_develop_env
   flush_memcached
