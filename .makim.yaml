@@ -31,11 +31,13 @@ groups:
       VAULT_CONFIG: ansible/config/vault-config.yaml
     tasks:
       containers-system-update:
-        help: Run ansible scripts for containers system update
+        help: Run ansible scripts for containers system update (prod only)
         run: |
           ansible-playbook -i "${{ env.HOSTS_DIR }}" --ask-vault-pass \
             --extra-vars "@${{ env.VAULT_CONFIG }}" \
-            playbooks/containers-system-update.yaml --verbose
+            playbooks/containers-system-update.yaml \
+            --skip-tags staging \
+            --verbose
 
       update-alertas:
         help: Execute the playbook to update alerts
@@ -70,7 +72,7 @@ groups:
             required: true
           year:
             help: Notification year (format YYYY)
-            type: string     # Makim args support string|bool; avoid 'int'
+            type: string
             required: true
           codarea:
             help: Specify area code (default 'BR')
