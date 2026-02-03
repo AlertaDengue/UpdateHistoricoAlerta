@@ -143,7 +143,7 @@ manage_web_containers() {
 
   sugar compose build \
     --group "$group" \
-    --services web,worker
+    --services web,celery
 
   sugar compose down \
     --group "$group" \
@@ -151,7 +151,7 @@ manage_web_containers() {
 
   sugar compose-ext up \
     --group "$group" \
-    --services web,worker \
+    --services web,celery \
     --options "-d"
 }
 
