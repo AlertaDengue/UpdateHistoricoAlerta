@@ -23,16 +23,16 @@
         - copy
         - update
 
-    - name: Copy update_staging.sh script to remote host
-      copy:
-        src: "{{ SCRIPT_DIR }}/{{ UPDATE_STAGING }}"
-        dest: "{{ STAGING_PATH_ROOT }}/{{ UPDATE_STAGING }}"
-        mode: '0755'
-      become: true
-      become_user: administrador
-      tags:
-        - copy
-        - staging
+    # - name: Copy update_staging.sh script to remote host
+    #   copy:
+    #     src: "{{ SCRIPT_DIR }}/{{ UPDATE_STAGING }}"
+    #     dest: "{{ STAGING_PATH_ROOT }}/{{ UPDATE_STAGING }}"
+    #     mode: '0755'
+    #   become: true
+    #   become_user: administrador
+    #   tags:
+    #     - copy
+    #     - staging
 
     - name: Execute update_historico_alerta.sh Script on Server
       become: true
@@ -44,15 +44,15 @@
         - execute
         - update
 
-    - name: Execute update_staging.sh Script on Server
-      become: true
-      become_user: administrador
-      shell: "nohup ./{{ UPDATE_STAGING }}"
-      args:
-        chdir: "{{ STAGING_PATH_ROOT }}"
-      tags:
-        - execute
-        - staging
+    # - name: Execute update_staging.sh Script on Server
+    #   become: true
+    #   become_user: administrador
+    #   shell: "nohup ./{{ UPDATE_STAGING }}"
+    #   args:
+    #     chdir: "{{ STAGING_PATH_ROOT }}"
+    #   tags:
+    #     - execute
+    #     - staging
 
     - name: Clean up all bash scripts from Remote and destination directories
       ansible.builtin.shell: "rm -f {{ item }}/*.sh"
