@@ -155,6 +155,12 @@ manage_web_containers() {
     --options "-d"
 }
 
+update_collectstatic() {
+  echo -e "\n >>> Updating collectstatic <<< \n"
+
+  makim django.collectstatic
+}
+
 update_nginx() {
   echo -e "\n >>> Updating nginx <<< \n"
 
@@ -186,6 +192,7 @@ main() {
   refresh_materialized_views
   flush_memcached
   manage_web_containers
+  update_collectstatic
   update_nginx
 
   echo -e "\n >>> Finished updating AlertaDengue <<< \n"
