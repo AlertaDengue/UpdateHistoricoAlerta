@@ -118,7 +118,7 @@ flush_memcached() {
     return 0
   fi
 
-  if ! sugar compose exec \
+  if ! sugar compose-ext exec \
         --group "$group" \
         --service "$service" \
         --cmd "$cmd"
@@ -141,18 +141,13 @@ manage_web_containers() {
 
   local group="${ENV:-dev}"
 
-  sugar compose build \
-    --group "$group" \
-    --services web,celery
+  sugar compose-ext build \
+    --profile "$group" \
+    --services web,celery --no-cache
 
-  sugar compose down \
-    --group "$group" \
-    --options "--remove-orphans"
-
-  sugar compose-ext up \
-    --group "$group" \
-    --services web,celery \
-    --options "-d"
+  sugar compose-ext restart \
+    --profile "$group" \
+    --services web,celery --options -d
 }
 
 update_collectstatic() {
